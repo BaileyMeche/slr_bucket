@@ -1,0 +1,5 @@
+2026-02-26 10:38:26,964 INFO summary_pipeline - catalog rows=25
+2026-02-26 10:38:27,021 INFO summary_pipeline - funding mapping: {'ofr': 'C:\\Users\\Owner\\Box\\Winter26\\slr_bucket\\data\\event_inputs\\primary_dealer_stats_ofr_stfm_nypd_long.csv', 'repo': 'C:\\Users\\Owner\\Box\\Winter26\\slr_bucket\\data\\event_inputs\\repo_rates_combined.csv'}
+2026-02-26 10:38:27,084 INFO summary_pipeline - daily_long rows=14 saved=C:\Users\Owner\Box\Winter26\slr_bucket\outputs\cache\daily_long_f562fdf488e4.parquet
+2026-02-26 10:38:29,584 INFO summary_pipeline - dependent series: ['sofr', 'wedge']
+2026-02-26 10:38:29,589 INFO summary_pipeline - tenors: ['2y']

@@ -55,18 +55,53 @@ def jump_estimator(
     controls: list[str] | None = None,
     hac_lags: int = 5,
 ) -> tuple[float, float, int]:
+    # work = add_event_time(df, event_date)
+    # work = work[work["event_time"].between(-window, window)].copy()
+    # work["post"] = (work["event_time"] >= 0).astype(int)
+    # cols = ["post"] + (controls or [])
+    # cols = [c for c in cols if c in work.columns]
+    # work = work.dropna(subset=[y_col] + cols)
+    # if len(work) < 8:
+    #     return np.nan, np.nan, len(work)
+    # X = sm.add_constant(work[cols], has_constant="add")
+    # model = sm.OLS(work[y_col], X).fit()
+    # robust = _nw_cov_params(model, lags=hac_lags)
+    # est, se = _param_lookup(robust, "post", list(X.columns))
+    # return est, se, int(robust.nobs)
+    # Defensive: drop duplicate columns (keeps first occurrence)
+    if df.columns.duplicated().any():
+        df = df.loc[:, ~df.columns.duplicated()].copy()
+
+    # Never allow y to be a control
+    controls = [c for c in (controls or []) if c != y_col]
+
     work = add_event_time(df, event_date)
     work = work[work["event_time"].between(-window, window)].copy()
     work["post"] = (work["event_time"] >= 0).astype(int)
-    cols = ["post"] + (controls or [])
+
+    cols = ["post"] + controls
     cols = [c for c in cols if c in work.columns]
+
+    # Coerce to numeric defensively
+    work[y_col] = pd.to_numeric(work[y_col], errors="coerce")
+    for c in cols:
+        work[c] = pd.to_numeric(work[c], errors="coerce")
+
     work = work.dropna(subset=[y_col] + cols)
-    if len(work) < 8:
+
+    # Need both pre and post to identify "post"
+    if len(work) < 8 or work["post"].nunique(dropna=True) < 2:
         return np.nan, np.nan, len(work)
+
     X = sm.add_constant(work[cols], has_constant="add")
     model = sm.OLS(work[y_col], X).fit()
     robust = _nw_cov_params(model, lags=hac_lags)
-    est, se = _param_lookup(robust, "post", list(X.columns))
+
+    # If post got dropped (collinearity), bail gracefully
+    if "post" not in robust.model.exog_names:
+        return np.nan, np.nan, int(robust.nobs)
+
+    est, se = _param_lookup(robust, "post", list(robust.model.exog_names))
     return est, se, int(robust.nobs)
 
 
@@ -106,28 +141,125 @@ def event_study_regression(
     controls: list[str] | None = None,
     hac_lags: int = 5,
 ) -> pd.DataFrame:
+    # work = add_event_time(df, event_date)
+    # work["bin"] = make_bins(work["event_time"], bins)
+    # work = work.dropna(subset=["bin", y_col]).copy()
+    # dummies = pd.get_dummies(work["bin"], prefix="bin")
+    # if dummies.empty:
+    #     return pd.DataFrame(columns=["term", "estimate", "se", "ci_low", "ci_high", "n"])
+    # ref = "bin_[-20,-1]" if "bin_[-20,-1]" in dummies.columns else dummies.columns[0]
+    # dummies = dummies.drop(columns=[ref])
+    # X = dummies
+    # if controls:
+    #     present = [c for c in controls if c in work.columns]
+    #     if present:
+    #         X = pd.concat([X, work[present]], axis=1)
+    # joined = pd.concat([work[[y_col]], X], axis=1).dropna()
+    # if joined.empty:
+    #     return pd.DataFrame(columns=["term", "estimate", "se", "ci_low", "ci_high", "n"])
+    # Xf = sm.add_constant(joined.drop(columns=[y_col]), has_constant="add")
+
+    # #########
+    # # y
+    # y = joined[y_col]
+
+    # # X: drop date + any other non-regressors
+    # X = joined.drop(columns=[y_col], errors="ignore")
+    # X = X.drop(columns=["date"], errors="ignore")  # <-- critical
+
+    # # coerce any remaining non-numeric columns (defensive)
+    # for col in X.columns:
+    #     if not pd.api.types.is_numeric_dtype(X[col]):
+    #         X[col] = pd.to_numeric(X[col], errors="coerce")
+
+    # # drop all-NaN / constant columns (optional but helps robustness)
+    # X = X.dropna(axis=1, how="all")
+    # const_cols = [c for c in X.columns if X[c].nunique(dropna=True) <= 1]
+    # X = X.drop(columns=const_cols, errors="ignore")
+
+    # # align + drop missing
+    # reg = pd.concat([y, X], axis=1).dropna()
+    # y = reg[y_col].astype(float)
+    # X = reg.drop(columns=[y_col]).astype(float)
+
+    # X = sm.add_constant(X, has_constant="add")
+    # res = sm.OLS(y, X).fit()
+    # #########
+    
+    # # res = sm.OLS(joined[y_col], Xf).fit()
+    # robust = _nw_cov_params(res, hac_lags)
+    # names = list(Xf.columns)
+    # out = []
+    # for col in dummies.columns:
+    #     coef, se = _param_lookup(robust, col, names)
+    #     out.append({"term": col, "estimate": coef, "se": se, "ci_low": coef - 1.96 * se, "ci_high": coef + 1.96 * se, "n": int(robust.nobs)})
+    # return pd.DataFrame(out)
+    
+    # Defensive: drop duplicate columns (keeps first occurrence)
+    if df.columns.duplicated().any():
+        df = df.loc[:, ~df.columns.duplicated()].copy()
+
+    # Never allow y to be a control
+    controls = [c for c in (controls or []) if c != y_col]
+
     work = add_event_time(df, event_date)
     work["bin"] = make_bins(work["event_time"], bins)
+
+    # Coerce outcome numeric
+    work[y_col] = pd.to_numeric(work[y_col], errors="coerce")
+
     work = work.dropna(subset=["bin", y_col]).copy()
+
     dummies = pd.get_dummies(work["bin"], prefix="bin")
     if dummies.empty:
         return pd.DataFrame(columns=["term", "estimate", "se", "ci_low", "ci_high", "n"])
+
     ref = "bin_[-20,-1]" if "bin_[-20,-1]" in dummies.columns else dummies.columns[0]
     dummies = dummies.drop(columns=[ref])
+
     X = dummies
+
     if controls:
-        present = [c for c in controls if c in work.columns]
+        present = [c for c in controls if c in work.columns and c != y_col]
         if present:
-            X = pd.concat([X, work[present]], axis=1)
+            tmp = work[present].copy()
+            for c in present:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            X = pd.concat([X, tmp], axis=1)
+
     joined = pd.concat([work[[y_col]], X], axis=1).dropna()
     if joined.empty:
         return pd.DataFrame(columns=["term", "estimate", "se", "ci_low", "ci_high", "n"])
-    Xf = sm.add_constant(joined.drop(columns=[y_col]), has_constant="add")
-    res = sm.OLS(joined[y_col], Xf).fit()
+
+    y = joined[y_col]
+    # Force 1D endog (if y_col was duplicated somewhere, this prevents (n,k) endog)
+    if isinstance(y, pd.DataFrame):
+        y = y.iloc[:, 0]
+
+    X = joined.drop(columns=[y_col], errors="ignore")
+
+    # Drop all-NaN / constant columns (avoid singular designs)
+    X = X.dropna(axis=1, how="all")
+    const_cols = [c for c in X.columns if X[c].nunique(dropna=True) <= 1]
+    X = X.drop(columns=const_cols, errors="ignore")
+
+    if X.empty:
+        return pd.DataFrame(columns=["term", "estimate", "se", "ci_low", "ci_high", "n"])
+
+    X = sm.add_constant(X.astype(float), has_constant="add")
+    res = sm.OLS(y.astype(float), X).fit()
     robust = _nw_cov_params(res, hac_lags)
-    names = list(Xf.columns)
+
+    names = list(robust.model.exog_names)  # correct names for fitted model
+
     out = []
     for col in dummies.columns:
+        if col not in names:
+            continue
         coef, se = _param_lookup(robust, col, names)
-        out.append({"term": col, "estimate": coef, "se": se, "ci_low": coef - 1.96 * se, "ci_high": coef + 1.96 * se, "n": int(robust.nobs)})
+        out.append(
+            {"term": col, "estimate": coef, "se": se,
+             "ci_low": coef - 1.96 * se, "ci_high": coef + 1.96 * se,
+             "n": int(robust.nobs)}
+        )
     return pd.DataFrame(out)
