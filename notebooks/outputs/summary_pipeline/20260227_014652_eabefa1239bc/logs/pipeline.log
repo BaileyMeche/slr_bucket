@@ -1,1 +1,0 @@
-2026-02-26 19:47:29,582 WARNING summary_pipeline - analysis_panel unavailable/invalid (Could not resolve dataset 'analysis_panel' with extensions ('.parquet', '.csv').), using raw fallback
