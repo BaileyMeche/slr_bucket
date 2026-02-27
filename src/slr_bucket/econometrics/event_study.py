@@ -23,9 +23,23 @@ class JumpResult:
 
 
 def add_event_time(df: pd.DataFrame, event_date: str, date_col: str = "date") -> pd.DataFrame:
+    """Trading-day event time based on available sample dates."""
     out = df.copy()
+    out[date_col] = pd.to_datetime(out[date_col], errors="coerce")
     event = pd.Timestamp(event_date)
-    out["event_time"] = (pd.to_datetime(out[date_col]) - event).dt.days
+
+    valid_dates = pd.Series(out[date_col].dropna().sort_values().drop_duplicates().tolist())
+    if valid_dates.empty:
+        out["event_time"] = np.nan
+        return out
+
+    # Reference index: first date on/after event, else final available date.
+    ref_pos = valid_dates.searchsorted(event, side="left")
+    if ref_pos >= len(valid_dates):
+        ref_pos = len(valid_dates) - 1
+
+    date_to_pos = {d: i for i, d in enumerate(valid_dates)}
+    out["event_time"] = out[date_col].map(lambda d: date_to_pos.get(d, np.nan)) - ref_pos
     return out
 
 
