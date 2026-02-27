@@ -1,0 +1,97 @@
+{
+  "utc_timestamp": "2026-02-27T04:04:57Z",
+  "run_dir": "C:\\Users\\Owner\\Box\\Winter26\\slr_bucket\\outputs\\summary_pipeline\\20260226_220457_278369efc0",
+  "config_hash": "278369efc0",
+  "config": {
+    "outcomes_source": "tips_treasury_implied_rf_2010",
+    "outcome_pattern": "arb_",
+    "tenors_required": [
+      2,
+      5,
+      10
+    ],
+    "events": [
+      "2020-04-01",
+      "2021-03-19",
+      "2021-03-31"
+    ],
+    "windows": [
+      20,
+      60
+    ],
+    "event_bins": [
+      [
+        -60,
+        -41
+      ],
+      [
+        -40,
+        -21
+      ],
+      [
+        -20,
+        -1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        20
+      ],
+      [
+        21,
+        40
+      ],
+      [
+        41,
+        60
+      ]
+    ],
+    "total_controls": [
+      "VIX",
+      "HY_OAS",
+      "BAA10Y",
+      "issu_7_bil",
+      "issu_14_bil",
+      "issu_30_bil"
+    ],
+    "direct_controls": [
+      "VIX",
+      "HY_OAS",
+      "BAA10Y",
+      "issu_7_bil",
+      "issu_14_bil",
+      "issu_30_bil",
+      "SOFR",
+      "spr_tgcr",
+      "spr_effr"
+    ],
+    "hac_lags": 5,
+    "run_layer2": true
+  },
+  "git": {
+    "commit": "782ee81e2e396283dd723ca63276025f26df4baf",
+    "branch": "main",
+    "dirty": true
+  },
+  "python": {
+    "version": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:09:58) [MSC v.1929 64 bit (AMD64)]",
+    "executable": "c:\\ProgramData\\anaconda3\\envs\\risk\\python.exe"
+  },
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64"
+  },
+  "packages": {
+    "numpy": "2.3.3",
+    "pandas": "2.3.3",
+    "statsmodels": "0.14.5",
+    "matplotlib": "3.10.6",
+    "scipy": "1.16.2"
+  },
+  "notes": "No main dataframe found (looked for: analysis_panel, arb_panel, panel, daily_long, pivot)."
+}

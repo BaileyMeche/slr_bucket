@@ -1,0 +1,2 @@
+2026-02-26 22:18:28,314 INFO summary_pipeline - Loaded outcomes from c:\Users\Owner\Box\Winter26\slr_bucket\data\series\tips_treasury_implied_rf_2010.parquet with tenors=[2, 5, 10, 20]
+2026-02-26 22:18:36,295 WARNING summary_pipeline - Layer 2: dropping missing controls: ['spr_effr']

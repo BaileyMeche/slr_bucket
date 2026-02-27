@@ -107,7 +107,13 @@ def load_any_table(path: Path) -> pd.DataFrame:
     if suffix == ".csv":
         return pd.read_csv(path)
     if suffix in {".parquet", ".pq"}:
-        return pd.read_parquet(path)
+        try:
+            return pd.read_parquet(path)
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError(
+                "Unable to read parquet because no parquet engine is available. "
+                "Install one of: `pyarrow` (recommended) or `fastparquet`, then re-run."
+            ) from exc
     if suffix in {".xlsx", ".xls"}:
         return pd.read_excel(path)
     if suffix == ".json":
@@ -115,6 +121,7 @@ def load_any_table(path: Path) -> pd.DataFrame:
             payload = json.load(f)
         return pd.DataFrame(payload)
     raise ValueError(f"Unsupported file format: {path}")
+
 
 
 def normalize_date_column(df: pd.DataFrame) -> pd.DataFrame:
@@ -179,3 +186,50 @@ def discover_funding_series(data_dir: Path) -> dict[str, str]:
             if pattern in name and pattern not in mapping:
                 mapping[pattern] = str(path)
     return mapping
+
+def as_daily_date(s):
+    # robust to tz-aware + timestamps; outputs tz-naive midnight
+    return pd.to_datetime(s, errors="coerce", utc=True).dt.tz_convert(None).dt.normalize()
+
+def coerce_num(s):
+    if pd.api.types.is_numeric_dtype(s):
+        return s
+    return pd.to_numeric(
+        s.astype(str).str.replace(",", "", regex=False).str.strip(),
+        errors="coerce",
+    )
+
+def keep_controls_with_coverage(
+    df: pd.DataFrame,
+    cols: list[str],
+    required_cols: list[str] | None = None,
+    min_coverage: float = 0.80,
+    min_rows: int = 30,
+) -> pd.DataFrame:
+    """
+    Keep required columns always; keep only those optional columns whose non-missing
+    coverage >= min_coverage; then drop rows missing in required+kept optional.
+    """
+    required_cols = required_cols or []
+    # de-dup, keep order
+    cols = [c for c in dict.fromkeys(cols) if c in df.columns]
+    required_cols = [c for c in dict.fromkeys(required_cols) if c in df.columns]
+
+    # split optional vs required
+    optional = [c for c in cols if c not in required_cols]
+
+    # compute coverage on current df
+    cov = df[optional].notna().mean() if optional else pd.Series(dtype=float)
+    keep_optional = cov[cov >= min_coverage].index.tolist()
+
+    use = required_cols + keep_optional
+    out = df[use].copy()
+
+    # final row filter: require only required+kept optional
+    out = out.dropna(subset=use)
+
+    # if too small, relax by dropping optional controls entirely
+    if len(out) < min_rows and required_cols:
+        out = df[required_cols].dropna(subset=required_cols).copy()
+
+    return out

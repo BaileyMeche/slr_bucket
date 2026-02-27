@@ -1,0 +1,2 @@
+2026-02-26 21:35:47,527 INFO summary_pipeline - Loaded outcomes from c:\Users\Owner\Box\Winter26\slr_bucket\data\series\tips_treasury_implied_rf_2010.parquet with tenors=[2, 5, 10, 20]
+2026-02-26 21:35:47,603 WARNING summary_pipeline - analysis_panel unavailable/invalid (Could not resolve dataset 'analysis_panel' with extensions ('.parquet', '.csv').), using raw fallback

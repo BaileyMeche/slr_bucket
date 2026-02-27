@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Iterable
 
 import numpy as np
@@ -23,14 +24,31 @@ class JumpResult:
 
 
 def add_event_time(df: pd.DataFrame, event_date: str, date_col: str = "date") -> pd.DataFrame:
-    """Trading-day event time based on available sample dates."""
+    """Trading-day event time based on available sample dates. Robust to date being an index."""
     out = df.copy()
-    out[date_col] = pd.to_datetime(out[date_col], errors="coerce")
-    event = pd.Timestamp(event_date)
 
+    # If date is the index, bring it into a column
+    if date_col not in out.columns:
+        if isinstance(out.index, pd.DatetimeIndex):
+            out[date_col] = out.index
+        else:
+            # try common alternatives
+            for cand in ["Date", "dt", "timestamp", "time"]:
+                if cand in out.columns:
+                    out[date_col] = out[cand]
+                    break
+
+    # Ensure the column exists now
+    if date_col not in out.columns:
+        raise KeyError(f"add_event_time: expected a '{date_col}' column (or datetime index). "
+                       f"Columns={list(out.columns)} index={type(out.index)}")
+
+    out[date_col] = pd.to_datetime(out[date_col], errors="coerce")
+    out["event_time"] = np.nan  # ALWAYS create the column
+
+    event = pd.Timestamp(event_date)
     valid_dates = pd.Series(out[date_col].dropna().sort_values().drop_duplicates().tolist())
     if valid_dates.empty:
-        out["event_time"] = np.nan
         return out
 
     # Reference index: first date on/after event, else final available date.
@@ -90,6 +108,15 @@ def jump_estimator(
     controls = [c for c in (controls or []) if c != y_col]
 
     work = add_event_time(df, event_date)
+
+    # If event_time ended up as an index somehow, normalize it
+    if "event_time" not in work.columns and work.index.name == "event_time":
+        work = work.reset_index()
+
+    if "event_time" not in work.columns:
+        raise KeyError(f"jump_estimator: event_time missing after add_event_time. "
+                    f"Columns={list(work.columns)} index_name={work.index.name}")
+    
     work = work[work["event_time"].between(-window, window)].copy()
     work["post"] = (work["event_time"] >= 0).astype(int)
 
@@ -277,3 +304,246 @@ def event_study_regression(
              "n": int(robust.nobs)}
         )
     return pd.DataFrame(out)
+
+
+
+
+def pooled_jump_regression(
+    df: pd.DataFrame,
+    y_col: str,
+    event_date: str,
+    window: int,
+    group_col: str,
+    fe_col: str,
+    controls: list[str] | None = None,
+    hac_lags: int = 5,
+) -> pd.DataFrame:
+    """Pooled jump regression with series fixed effects and a group interaction.
+
+    Model: y ~ post + post*group + C(fe_col) + controls, within +/- window trading days.
+    Returns coefficients for post and post_x_group (and optionally grouped effects).
+    """
+    work = df.copy()
+    work = add_event_time(work, event_date)
+    work = work[work["event_time"].between(-window, window)].copy()
+    work["post"] = (work["event_time"] >= 0).astype(int)
+
+    if group_col not in work.columns:
+        raise KeyError(f"pooled_jump_regression: missing group_col={group_col}")
+    if fe_col not in work.columns:
+        raise KeyError(f"pooled_jump_regression: missing fe_col={fe_col}")
+
+    # numeric outcome and group
+    work[y_col] = pd.to_numeric(work[y_col], errors="coerce")
+    g = pd.to_numeric(work[group_col], errors="coerce").fillna(0).astype(int)
+    work["_g"] = g
+    work["post_x_g"] = work["post"] * work["_g"]
+
+    # FE dummies
+    fe = pd.get_dummies(work[fe_col].astype(str), prefix="fe", drop_first=True)
+
+    X_parts = [work[["post", "post_x_g"]], fe]
+
+    # controls
+    if controls:
+        present = [c for c in controls if c in work.columns and c != y_col]
+        if present:
+            tmp = work[present].copy()
+            for c in present:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            X_parts.append(tmp)
+
+    X = pd.concat(X_parts, axis=1)
+    reg = pd.concat([work[[y_col]], X], axis=1).dropna()
+
+    if reg.empty or reg["post"].nunique() < 2:
+        return pd.DataFrame(columns=["term","estimate","se","ci_low","ci_high","n"])
+
+    y = reg[y_col].astype(float)
+    X = reg.drop(columns=[y_col]).astype(float)
+    X = X.dropna(axis=1, how="all")
+    const_cols = [c for c in X.columns if X[c].nunique(dropna=True) <= 1]
+    X = X.drop(columns=const_cols, errors="ignore")
+    X = sm.add_constant(X, has_constant="add")
+
+    res = sm.OLS(y, X).fit()
+    robust = _nw_cov_params(res, lags=hac_lags)
+    names = list(robust.model.exog_names)
+
+    out = []
+    for term in ["post", "post_x_g"]:
+        if term in names:
+            coef, se = _param_lookup(robust, term, names)
+            out.append({"term": term, "estimate": coef, "se": se,
+                        "ci_low": coef - 1.96*se, "ci_high": coef + 1.96*se,
+                        "n": int(robust.nobs)})
+
+    return pd.DataFrame(out)
+
+
+def pooled_event_study(
+    df: pd.DataFrame,
+    y_col: str,
+    event_date: str,
+    bins: list[tuple[int, int]],
+    group_col: str,
+    fe_col: str,
+    controls: list[str] | None = None,
+    hac_lags: int = 5,
+    ref_bin: str | None = None,
+) -> tuple[pd.DataFrame, object]:
+    """Pooled binned event-study with series fixed effects + group interactions.
+
+    Baseline group is group_col==0.
+    Model:
+        y ~ sum_k beta_k * 1[bin=k] + sum_k gamma_k * (group * 1[bin=k]) + FE + controls
+    where one bin is omitted as reference.
+    Returns (results_df, robust_results_obj).
+    """
+    work = df.copy()
+    work = add_event_time(work, event_date)
+    work["bin"] = make_bins(work["event_time"], bins)
+
+    if group_col not in work.columns:
+        raise KeyError(f"pooled_event_study: missing group_col={group_col}")
+    if fe_col not in work.columns:
+        raise KeyError(f"pooled_event_study: missing fe_col={fe_col}")
+
+    work[y_col] = pd.to_numeric(work[y_col], errors="coerce")
+    work = work.dropna(subset=["bin", y_col]).copy()
+
+    # group indicator
+    work["_g"] = pd.to_numeric(work[group_col], errors="coerce").fillna(0).astype(int)
+
+    # bin dummies
+    d = pd.get_dummies(work["bin"], prefix="bin")
+    if d.empty:
+        return (pd.DataFrame(columns=["term","estimate","se","ci_low","ci_high","n"]), None)
+
+    # choose reference bin
+    if ref_bin is None:
+        default = "bin_[-20,-1]"
+        ref = default if default in d.columns else d.columns[0]
+    else:
+        ref = ref_bin if ref_bin in d.columns else d.columns[0]
+    d = d.drop(columns=[ref])
+
+    # interactions
+    inter = d.mul(work["_g"], axis=0)
+    inter.columns = [c + ":g" for c in d.columns]
+
+    # FE dummies (series FE)
+    fe = pd.get_dummies(work[fe_col].astype(str), prefix="fe", drop_first=True)
+
+    X_parts = [d, inter, fe]
+
+    # controls
+    if controls:
+        present = [c for c in controls if c in work.columns and c != y_col]
+        if present:
+            tmp = work[present].copy()
+            for c in present:
+                tmp[c] = pd.to_numeric(tmp[c], errors="coerce")
+            X_parts.append(tmp)
+
+    X = pd.concat(X_parts, axis=1)
+    reg = pd.concat([work[[y_col]], X], axis=1).dropna()
+    if reg.empty:
+        return (pd.DataFrame(columns=["term","estimate","se","ci_low","ci_high","n"]), None)
+
+    y = reg[y_col].astype(float)
+    X = reg.drop(columns=[y_col]).astype(float)
+    X = X.dropna(axis=1, how="all")
+    const_cols = [c for c in X.columns if X[c].nunique(dropna=True) <= 1]
+    X = X.drop(columns=const_cols, errors="ignore")
+    X = sm.add_constant(X, has_constant="add")
+
+    res = sm.OLS(y, X).fit()
+    robust = _nw_cov_params(res, lags=hac_lags)
+    names = list(robust.model.exog_names)
+    cov = robust.cov_params()
+
+    def _bin_mid(colname: str) -> float:
+        m = re.search(r"\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]", colname)
+        if not m:
+            return np.nan
+        a, b = int(m.group(1)), int(m.group(2))
+        return 0.5*(a+b)
+
+    out = []
+    # baseline bin effects (group=0)
+    for col in d.columns:
+        if col not in names:
+            continue
+        coef, se = _param_lookup(robust, col, names)
+        out.append({
+            "term": col,
+            "kind": "baseline_bin",
+            "estimate": coef,
+            "se": se,
+            "ci_low": coef - 1.96*se,
+            "ci_high": coef + 1.96*se,
+            "bin_mid": _bin_mid(col),
+            "ref_bin": ref,
+            "n": int(robust.nobs),
+        })
+    # interaction bin effects (increment for group=1)
+    for col in inter.columns:
+        if col not in names:
+            continue
+        coef, se = _param_lookup(robust, col, names)
+        out.append({
+            "term": col,
+            "kind": "interaction_bin",
+            "estimate": coef,
+            "se": se,
+            "ci_low": coef - 1.96*se,
+            "ci_high": coef + 1.96*se,
+            "bin_mid": _bin_mid(col.replace(":g", "")),
+            "ref_bin": ref,
+            "n": int(robust.nobs),
+        })
+
+    # group-specific bin effects: group0=baseline, group1=baseline+interaction
+    for base in d.columns:
+        base_name = base
+        inter_name = base + ":g"
+        if base_name not in names:
+            continue
+        b = float(robust.params[names.index(base_name)])
+        vb = float(cov.loc[base_name, base_name]) if hasattr(cov, "loc") else float(cov[names.index(base_name), names.index(base_name)])
+        # group 0 effect
+        se0 = float(np.sqrt(max(vb, 0.0)))
+        out.append({
+            "term": base_name,
+            "kind": "group0_effect",
+            "estimate": b,
+            "se": se0,
+            "ci_low": b - 1.96*se0,
+            "ci_high": b + 1.96*se0,
+            "bin_mid": _bin_mid(base_name),
+            "ref_bin": ref,
+            "n": int(robust.nobs),
+        })
+        if inter_name in names:
+            g = float(robust.params[names.index(inter_name)])
+            vg = float(cov.loc[inter_name, inter_name]) if hasattr(cov, "loc") else float(cov[names.index(inter_name), names.index(inter_name)])
+            cbg = float(cov.loc[base_name, inter_name]) if hasattr(cov, "loc") else float(cov[names.index(base_name), names.index(inter_name)])
+            s = b + g
+            vs = vb + vg + 2.0*cbg
+            se1 = float(np.sqrt(max(vs, 0.0)))
+            out.append({
+                "term": base_name,
+                "kind": "group1_effect",
+                "estimate": s,
+                "se": se1,
+                "ci_low": s - 1.96*se1,
+                "ci_high": s + 1.96*se1,
+                "bin_mid": _bin_mid(base_name),
+                "ref_bin": ref,
+                "n": int(robust.nobs),
+            })
+
+    out_df = pd.DataFrame(out)
+    out_df["event_date"] = event_date
+    return out_df, robust
