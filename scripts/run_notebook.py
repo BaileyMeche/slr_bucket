@@ -6,7 +6,12 @@ from pathlib import Path
 
 
 def main() -> int:
-    nb_path = Path("notebooks/summary_pipeline.ipynb")
+    nb_arg = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("notebooks/summary_pipeline.ipynb")
+    nb_path = nb_arg if nb_arg.is_absolute() else Path(nb_arg)
+    if not nb_path.exists() and nb_path.suffix == "":
+        alt = nb_path.with_suffix(".ipynb")
+        if alt.exists():
+            nb_path = alt
     if not nb_path.exists():
         raise FileNotFoundError(f"Notebook not found: {nb_path}")
 

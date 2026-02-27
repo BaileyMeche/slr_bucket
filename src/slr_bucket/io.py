@@ -8,8 +8,21 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 DATE_CANDIDATES = ["date", "DATE", "observation_date", "timestamp", "Time Period"]
+DEFAULT_FALLBACK_ROOTS = [
+    Path("."),
+    Path("~/slr_episode").expanduser(),
+    Path("~/data").expanduser(),
+    Path("~/data/_output").expanduser(),
+    Path("~/data/_data").expanduser(),
+    Path("~/data/data_manual").expanduser(),
+]
+JOIN_KEY_CONVENTIONS = {
+    "daily": ["date"],
+    "weekly": ["date"],
+    "quarterly": ["report_date"],
+    "issuance_raw": ["issue_date"],
+}
 
 
 def _infer_frequency(date_series: pd.Series) -> str:
@@ -24,7 +37,69 @@ def _infer_frequency(date_series: pd.Series) -> str:
         return "weekly"
     if med <= 31:
         return "monthly"
+    if med <= 100:
+        return "quarterly"
     return "irregular"
+
+
+def _dataset_layer(path: Path) -> str:
+    parts = set(path.parts)
+    if "raw" in parts:
+        return "raw"
+    if "intermediate" in parts:
+        return "intermediate"
+    if "series" in parts:
+        return "series"
+    if "outputs" in parts:
+        return "output"
+    return "unknown"
+
+
+def _join_hints(df: pd.DataFrame, frequency: str, path: Path) -> str:
+    hints: list[str] = []
+    conv = JOIN_KEY_CONVENTIONS.get(frequency)
+    if conv and all(c in df.columns for c in conv):
+        hints.append(f"{frequency}:{'+'.join(conv)}")
+    if "issue_date" in df.columns:
+        hints.append("issuance_raw:issue_date")
+    candidate = [c for c in ["date", "report_date", "issue_date", "tenor", "tenor_bucket"] if c in df.columns]
+    if candidate:
+        hints.append("keys:" + "+".join(candidate))
+    hints.append(f"layer:{_dataset_layer(path)}")
+    return " | ".join(dict.fromkeys(hints))
+
+
+def resolve_dataset_path(
+    dataset_name: str,
+    expected_dir: Path | None = None,
+    fallback_roots: list[Path] | None = None,
+    prefer_ext: tuple[str, ...] = (".parquet", ".csv"),
+) -> Path:
+    roots = fallback_roots or DEFAULT_FALLBACK_ROOTS
+    candidates: list[Path] = []
+
+    if expected_dir is not None:
+        for ext in prefer_ext:
+            p = expected_dir / f"{dataset_name}{ext}"
+            if p.exists():
+                return p
+
+    for root in roots:
+        root = root.expanduser()
+        if not root.exists():
+            continue
+        for ext in prefer_ext:
+            matches = sorted(root.rglob(f"{dataset_name}{ext}"))
+            candidates.extend(matches)
+        if candidates:
+            break
+
+    if not candidates:
+        raise FileNotFoundError(f"Could not resolve dataset '{dataset_name}' with extensions {prefer_ext}.")
+
+    # extension priority then shortest path heuristic
+    candidates = sorted(candidates, key=lambda p: (prefer_ext.index(p.suffix.lower()), len(p.parts)))
+    return candidates[0]
 
 
 def load_any_table(path: Path) -> pd.DataFrame:
@@ -59,39 +134,38 @@ def build_data_catalog(data_dir: Path) -> pd.DataFrame:
             continue
         try:
             df = normalize_date_column(load_any_table(path))
-            key_cols = [c for c in ["date", "tenor", "series", "value"] if c in df.columns]
-            freq = _infer_frequency(df["date"]) if "date" in df.columns else "unknown"
+            freq = _infer_frequency(df["date"]) if "date" in df.columns else ("quarterly" if "report_date" in df.columns else "unknown")
             date_min = df["date"].min() if "date" in df.columns else pd.NaT
             date_max = df["date"].max() if "date" in df.columns else pd.NaT
             rows.append(
                 {
                     "path": str(path),
+                    "layer": _dataset_layer(path),
                     "rows": len(df),
-                    "columns": ",".join(map(str, df.columns[:40])),
+                    "columns": ",".join(map(str, df.columns[:80])),
                     "frequency": freq,
                     "date_min": date_min,
                     "date_max": date_max,
-                    "suggested_join_keys": ",".join(key_cols) if key_cols else "",
+                    "key_columns": ",".join([c for c in ["date", "report_date", "issue_date", "tenor", "tenor_bucket", "series", "value"] if c in df.columns]),
+                    "join_hints": _join_hints(df, freq, path),
                 }
             )
         except Exception as exc:  # noqa: BLE001
             logger.warning("Catalog failed for %s: %s", path, exc)
-            rows.append({"path": str(path), "rows": None, "columns": "", "frequency": "error", "date_min": None, "date_max": None, "suggested_join_keys": ""})
+            rows.append(
+                {
+                    "path": str(path),
+                    "layer": _dataset_layer(path),
+                    "rows": None,
+                    "columns": "",
+                    "frequency": "error",
+                    "date_min": None,
+                    "date_max": None,
+                    "key_columns": "",
+                    "join_hints": "",
+                }
+            )
     return pd.DataFrame(rows)
-
-
-def find_daily_long(data_dir: Path) -> pd.DataFrame:
-    candidates = list(data_dir.rglob("*daily*long*.parquet")) + list(data_dir.rglob("*daily*long*.csv"))
-    if not candidates:
-        raise FileNotFoundError(
-            "Could not locate daily_long in ./data. Add a file named like '*daily*long*.csv|parquet' with columns date, tenor, series, value."
-        )
-    df = normalize_date_column(load_any_table(candidates[0]))
-    expected = {"date", "tenor", "series", "value"}
-    missing = expected - set(df.columns)
-    if missing:
-        raise ValueError(f"daily_long missing columns {sorted(missing)} from source {candidates[0]}")
-    return df[["date", "tenor", "series", "value"]].copy()
 
 
 def discover_funding_series(data_dir: Path) -> dict[str, str]:
