@@ -1,0 +1,1 @@
+2026-02-27 14:03:24,411 INFO summary_pipeline_multi - Built controls from raw sources. columns=['date', 'BAA10Y', 'HY_OAS', 'SOFR', 'VIX', 'issu_14_bil', 'issu_30_bil', 'issu_7_bil', 'spr_tgcr']
