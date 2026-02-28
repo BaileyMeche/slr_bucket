@@ -1,0 +1,2 @@
+strategy,tenor,N_days,mean_absW,median_absW,share_absW_le_5,share_absW_le_10
+cip,3m,2088,25.93970254433705,24.641097043921192,0.017720306513409962,0.06561302681992337

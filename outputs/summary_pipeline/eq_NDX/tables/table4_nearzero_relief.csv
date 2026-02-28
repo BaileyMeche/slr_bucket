@@ -1,0 +1,2 @@
+strategy,tenor,N_days,mean_absW,median_absW,share_absW_le_5,share_absW_le_10
+eq_spot_fut,index,248,32.42816702965753,28.43087375321622,0.020161290322580645,0.028225806451612902
