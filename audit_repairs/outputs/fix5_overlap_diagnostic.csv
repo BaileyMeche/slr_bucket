@@ -1,0 +1,5 @@
+event_1,event_2,gap_trading_days,window,overlap_trading_days,is_overlap,recommended_max_window
+2020-04-01,2021-03-19,251,20,0,False,125
+2020-04-01,2021-03-19,251,60,0,False,125
+2021-03-19,2021-03-31,7,20,33,True,3
+2021-03-19,2021-03-31,7,60,113,True,3

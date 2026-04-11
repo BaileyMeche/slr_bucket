@@ -1,0 +1,99 @@
+Loading outcomes (corrected unit loader)...
+[fix_1] TIPS-Treasury medians after fix (should be 15-30 bps):
+                   n  median_abs_bps
+series_id                           
+tips_treas_10y  3752       24.563473
+tips_treas_2y   3717       22.484597
+tips_treas_5y   3752       19.418802
+[fix_1] UST SF medians after fix (should be 10-80 bps):
+               n  median_abs_bps
+series_id                       
+ust_sf_10y  4967       23.480111
+ust_sf_2y   4967       18.755000
+ust_sf_5y   4967       17.374667
+[fix_1] CIP medians after fix (all should be 5-100 bps):
+              n  median_abs_bps
+series_id                      
+cip_aud    3913        9.890675
+cip_cad    3912       12.747893
+cip_chf    3911       31.143697
+cip_eur    3912       36.224972
+cip_gbp    3912       10.703539
+cip_jpy    3910       38.772292
+cip_nzd    3912       11.978674
+cip_sek    3912       22.609615
+[fix_1] Equity SPX (spread_SPX): median_abs = 43.61 bps (target: 20-60)
+[fix_1] Equity NDX (spread_NDX): median_abs = 40.09 bps (target: 20-60)
+[fix_1] Equity INDU (spread_INDU): median_abs = 47.05 bps (target: 20-60)
+
+[fix_1] Total stacked panel: 68,620 rows, 17 unique series
+Winsorizing outcome variables (Fix 7: p1/p99 by series)...
+
+[fix_7_winsorize] Observations clipped at p1/p99:
+  cip_aud                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-44.4, 23.6] bps
+  cip_aud                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[0.2, 44.6] bps
+  cip_cad                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-2.7, 45.1] bps
+  cip_cad                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[0.2, 45.1] bps
+  cip_chf                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-4.0, 103.7] bps
+  cip_chf                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[0.9, 103.7] bps
+  cip_eur                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-432.4, 89.3] bps
+  cip_eur                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[1.6, 432.4] bps
+  cip_gbp                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-3.9, 55.5] bps
+  cip_gbp                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[0.8, 55.5] bps
+  cip_jpy                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[12.7, 110.4] bps
+  cip_jpy                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[12.7, 110.4] bps
+  cip_nzd                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-29.1, 38.7] bps
+  cip_nzd                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[0.5, 41.2] bps
+  cip_sek                   y_bps       : lo_clips= 40, hi_clips= 40  bounds=[-6.3, 92.0] bps
+  cip_sek                   y_abs_bps   : lo_clips= 40, hi_clips= 40  bounds=[1.1, 92.0] bps
+  eq_indu                   y_bps       : lo_clips= 38, hi_clips= 38  bounds=[-69.6, 120.6] bps
+  eq_indu                   y_abs_bps   : lo_clips= 38, hi_clips= 38  bounds=[3.1, 126.5] bps
+  eq_ndx                    y_bps       : lo_clips= 38, hi_clips= 38  bounds=[-11.6, 109.2] bps
+  eq_ndx                    y_abs_bps   : lo_clips= 38, hi_clips= 38  bounds=[1.9, 109.2] bps
+  eq_spx                    y_bps       : lo_clips= 38, hi_clips= 38  bounds=[-26.8, 111.4] bps
+  eq_spx                    y_abs_bps   : lo_clips= 38, hi_clips= 38  bounds=[3.5, 111.4] bps
+  tips_treas_10y            y_bps       : lo_clips= 38, hi_clips= 38  bounds=[1.1, 38.4] bps
+  tips_treas_10y            y_abs_bps   : lo_clips= 38, hi_clips= 38  bounds=[1.7, 38.4] bps
+  tips_treas_2y             y_bps       : lo_clips= 38, hi_clips= 38  bounds=[-17.7, 42.0] bps
+  tips_treas_2y             y_abs_bps   : lo_clips= 38, hi_clips= 38  bounds=[0.5, 42.0] bps
+  tips_treas_5y             y_bps       : lo_clips= 38, hi_clips= 38  bounds=[-0.4, 38.4] bps
+  tips_treas_5y             y_abs_bps   : lo_clips= 38, hi_clips= 38  bounds=[0.8, 38.4] bps
+  ust_sf_10y                y_bps       : lo_clips= 50, hi_clips= 50  bounds=[-39.1, 227.3] bps
+  ust_sf_10y                y_abs_bps   : lo_clips= 50, hi_clips= 50  bounds=[0.5, 227.3] bps
+  ust_sf_2y                 y_bps       : lo_clips= 50, hi_clips= 50  bounds=[-38.0, 178.1] bps
+  ust_sf_2y                 y_abs_bps   : lo_clips= 50, hi_clips= 50  bounds=[0.4, 178.1] bps
+  ust_sf_5y                 y_bps       : lo_clips= 50, hi_clips= 50  bounds=[-39.9, 179.2] bps
+  ust_sf_5y                 y_abs_bps   : lo_clips= 50, hi_clips= 50  bounds=[0.3, 179.2] bps
+[fix_7_winsorize] Log saved: C:\Users\Owner\Box\Winter26\slr_bucket\.claude\worktrees\heuristic-borg\audit_repairs\outputs\fix7_winsorize_log.csv
+Loading controls (including issuance controls)...
+  Issuance controls merged: issu_7_bil, issu_14_bil, issu_30_bil
+Full panel (post-filter): 13,036 rows, 17 series, 784 dates
+Series                      AR(1) coef       SE        t      N       Flag
+---------------------------------------------------------------------------
+cip_aud                         0.9527   0.0108    88.17    783           
+cip_cad                         0.9820   0.0071   139.25    783           
+cip_chf                         0.9574   0.0104    91.80    783           
+cip_eur                         0.9612   0.0100    96.51    782           
+cip_gbp                         0.9742   0.0081   120.00    782           
+cip_jpy                         0.9804   0.0072   135.87    782           
+cip_nzd                         0.9029   0.0153    58.86    783           
+cip_sek                         0.9549   0.0107    89.36    783           
+eq_indu                         0.9536   0.0111    86.20    746           
+eq_ndx                          0.9560   0.0107    89.08    746           
+eq_spx                          0.9512   0.0114    83.75    745           
+tips_treas_10y                  0.9633   0.0098    97.87    751           
+tips_treas_2y                   0.9572   0.0107    89.13    751           
+tips_treas_5y                   0.9627   0.0098    97.75    751           
+ust_sf_10y                      0.8811   0.0172    51.13    756    LOW AR1
+ust_sf_2y                       0.9380   0.0128    73.53    756           
+ust_sf_5y                       0.9503   0.0114    83.47    756           
+
+Saved: ar1_coefficients.csv
+
+Summary: 15 of 17 series have AR(1) > 0.93
+         1 series have AR(1) < 0.90 (below claim)
+
+Min AR(1): 0.8811 (ust_sf_10y)
+Max AR(1): 0.9820 (cip_cad)
+
+=== TASK 4 COMPLETE ===

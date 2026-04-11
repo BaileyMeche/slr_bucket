@@ -1,0 +1,50 @@
+\begin{table}[htbp]
+\centering
+\caption{SLR Exclusion Event Study: Pooled Jump Regressions}
+\label{tab:slr_pooled_v2}
+\small
+\begin{tabular}{l cccc cccc}
+\hline\hline
+& \multicolumn{4}{c}{Entry Event (2020-04-01)$^\dagger$}
+& \multicolumn{4}{c}{Exit Event (2021-03-31)} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+& \multicolumn{2}{c}{$W=20$} & \multicolumn{2}{c}{$W=60$}
+& \multicolumn{2}{c}{$W=20$} & \multicolumn{2}{c}{$W=60$} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+& TOTAL & DIRECT & TOTAL & DIRECT & TOTAL & DIRECT & TOTAL & DIRECT \\
+\hline
+\multicolumn{9}{l}{\textit{Panel A: Pooled regressions}} \\[3pt]
+\quad Post & -0.84 & +1.45 & -7.08$^{**}$ & -2.76 & -2.62$^{***}$ & -2.28$^{***}$ & -3.09$^{***}$ & -3.23$^{***}$ \\
+ & (4.77) & (7.03) & (3.05) & (5.54) & (0.77) & (0.68) & (0.83) & (0.85) \\[3pt]
+\quad Post $\times$ TreasuryBased & -2.16 & -2.23 & -4.54 & -4.52 & +3.91$^{***}$ & +3.90$^{***}$ & +3.84$^{***}$ & +3.84$^{***}$ \\
+ & (6.13) & (6.14) & (3.00) & (3.00) & (0.92) & (0.92) & (0.89) & (0.88) \\[3pt]
+$N$ & 697 & 697 & 2057 & 2057 & 697 & 697 & 2057 & 2057 \\
+$R^2$ & 0.61 & 0.61 & 0.55 & 0.55 & 0.96 & 0.96 & 0.89 & 0.89 \\
+\hline
+\multicolumn{9}{l}{\textit{Panel B: Clean DiD (2019 pre-COVID baseline, excl.\ Feb--Mar 2020)}} \\[3pt]
+& \multicolumn{4}{c}{Relief period} & \multicolumn{4}{c}{Post-relief period} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+& \multicolumn{2}{c}{TOTAL} & \multicolumn{2}{c}{DIRECT}
+& \multicolumn{2}{c}{TOTAL} & \multicolumn{2}{c}{DIRECT} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+\quad Non-Treasury & \multicolumn{2}{c}{-1.34} & \multicolumn{2}{c}{-11.03$^{***}$} & \multicolumn{2}{c}{-6.92$^{***}$} & \multicolumn{2}{c}{-14.87$^{***}$} \\
+\quad $\times$ TreasuryBased & \multicolumn{2}{c}{-10.76$^{***}$} & \multicolumn{2}{c}{-10.77$^{***}$} & \multicolumn{2}{c}{-9.03$^{***}$} & \multicolumn{2}{c}{-9.04$^{***}$} \\
+\quad $N$ & \multicolumn{4}{c}{12326} & \multicolumn{4}{c}{12326} \\
+\hline
+\hline
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Dependent variable: $|W|$, absolute spread in basis points.
+\item Post = indicator for event window post-announcement.
+\item TreasuryBased = 1 for UST spot-futures and TIPS-Treasury series.
+\item All specifications include series fixed effects.
+\item TOTAL controls: VIX, HY spread (ICE BofA), BAA-10Y spread.
+\item DIRECT controls: TOTAL + SOFR level, TGCR-SOFR spread, rolling issuance (7/14/30 day).
+\item HAC standard errors in parentheses (Newey-West, 5 lags).
+\item $^{***}$ $p<0.01$, $^{**}$ $p<0.05$, $^{*}$ $p<0.10$.
+\item $^\dagger$ Entry pre-period (Jan--Mar 2020) spans COVID crash peak.
+\item \quad UST SF pre-period baseline elevated; entry estimates are upward-biased.
+\item \quad See Panel B (clean DiD) for COVID-corrected entry estimate.
+\end{tablenotes}
+\end{table}

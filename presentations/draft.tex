@@ -1,3 +1,35 @@
+\documentclass[00_nsf_proposal.tex]{subfiles}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+\usepackage{tikz, booktabs, threeparttable}
+\usepackage{hyperref}
+\usetikzlibrary{calc}
+
+\usepackage{eso-pic}
+
+\definecolor{maroon}{RGB}{128, 0, 0}
+% Define the footer command with the red bar and logo.
+\newcommand{\eraufooter}{%
+  \AddToShipoutPictureBG{%
+    \begin{tikzpicture}[remember picture,overlay]
+      % Draw a red rectangle at the bottom of the page (2cm high)
+      \fill[maroon] (current page.south west) rectangle ([yshift=2cm]current page.south east);
+      % Place the logo centered within the red bar by shifting 1cm upward (vertical center)
+      \node at ($(current page.south west)!0.5!(current page.south east)+(0,1cm)$) {%
+        \includegraphics[width=0.25\linewidth]{figs/uc-logo-white.eps}%
+      };
+    \end{tikzpicture}%
+  }%
+}
+
+% Activate the footer on every page.
+\eraufooter
 
 \begin{document}
 
@@ -343,7 +375,7 @@ parallel-trends test is the clean DiD with the 2019 pre-COVID baseline
 \end{tablenotes}
 \end{table}
 
-\subsection{The Exit Event: Primary Identification}
+\subsubsection{The Exit Event: Primary Identification}
 \label{sec:exit}
 
 Table~\ref{tab:pooled_jump} reports estimates of (\ref{eq:did}) for the
@@ -426,7 +458,7 @@ who estimate a shadow cost of primary dealer leverage constraints of
 even a partial tightening of constraints would re-widen spreads by
 several basis points over a short post-expiry horizon.
 
-\subsection{Clean Difference-in-Differences}
+\subsubsection{Clean Difference-in-Differences}
 \label{sec:did_clean}
 
 The event-window specification conditions on a narrow local window around
@@ -439,6 +471,67 @@ balanced panel of $N = 12{,}326$ series-day observations across three
 regimes: pre (4,713 observations), relief (4,335 observations), and
 post-relief (3,286 observations).
 
+\begin{table}[h]
+\centering
+\caption{Clean Difference-in-Differences: Full-Period Estimates}
+\label{tab:did_clean}
+\small
+\begin{tabular}{l cc}
+\hline\hline
+& \textsc{Total} & \textsc{Direct} \\
+\hline
+\multicolumn{3}{l}{\textit{Panel A: Relief period (2020-04-01 to 2021-03-30)}} \\[3pt]
+$\hat{\mu}_1$: Relief (non-Treasury baseline)
+  & $-1.34$   & $-11.03^{***}$ \\
+  & $(1.13)$  & $(2.97)$ \\[3pt]
+$\hat{\mu}_2$: Relief $\times$ TreasuryBased
+  & $-10.76^{***}$ & $-10.77^{***}$ \\
+  & $(1.15)$       & $(1.14)$ \\[6pt]
+\multicolumn{3}{l}{\textit{Panel B: Post-relief period (2021-04-01 to 2021-12-31)}} \\[3pt]
+$\hat{\mu}_3$: Post-relief (non-Treasury baseline)
+  & $-6.92^{***}$ & $-14.87^{***}$ \\
+  & $(1.01)$      & $(2.80)$ \\[3pt]
+$\hat{\mu}_4$: Post-relief $\times$ TreasuryBased
+  & $-9.03^{***}$ & $-9.04^{***}$ \\
+  & $(1.16)$      & $(1.16)$ \\[6pt]
+\hline
+$N$ (total)           & $12{,}326$  & $12{,}326$ \\
+\quad Pre-period      & $4{,}713$   & $4{,}713$  \\
+\quad Relief period   & $4{,}335$   & $4{,}335$  \\
+\quad Post-relief     & $3{,}286$   & $3{,}286$  \\
+$R^{2}$               & $0.516$     & $0.521$    \\
+Series FE             & Yes         & Yes        \\
+\textsc{Total} controls  & Yes      & Yes        \\
+\textsc{Direct} controls & No       & Yes        \\
+\hline\hline
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item \textit{Notes.} Dependent variable is $|W_{i,t}|$, the absolute
+arbitrage spread in basis points, for all 17 series over 2019--2021
+($N = 12{,}326$ series-day observations). The baseline period is the 2019
+calendar year; February and March 2020 are excluded to avoid COVID-19 crash
+contamination. The regression is
+$|W_{i,t}| = \alpha_i + \mu_1\,\mathrm{Relief}_t
+  + \mu_2\,(\mathrm{Relief}_t \times \mathrm{TreasuryBased}_i)
+  + \mu_3\,\mathrm{PostRelief}_t
+  + \mu_4\,(\mathrm{PostRelief}_t \times \mathrm{TreasuryBased}_i)
+  + \gamma X_t + \varepsilon_{it}$.
+$\mathrm{TreasuryBased}_i = 1$ for UST spot-futures and TIPS-Treasury series
+(6 of 17 series). \textsc{Total} controls: VIX, HY OAS, Baa-10y spread.
+\textsc{Direct} adds SOFR, TGCR-SOFR, and rolling 7/14/30-day Treasury
+issuance (all lagged one day). HAC standard errors (Newey-West, 5 lags) in
+parentheses. ${}^{***}\,p<0.01$, ${}^{**}\,p<0.05$, ${}^{*}\,p<0.10$.
+The large \textsc{Direct} non-Treasury baseline during relief ($\hat{\mu}_1 =
+-11.03$ bps) reflects the mechanical relationship between SOFR and non-Treasury
+spreads ($\hat{\beta}_{\mathrm{SOFR}} = -0.82$, $t = -3.56$); the Treasury
+interaction $\hat{\mu}_2$ is stable across specifications ($-10.76$
+vs.\ $-10.77$ bps). See Section~\ref{sec:did_clean} for discussion.
+\end{tablenotes}
+\end{table}
+
+
+%% ISSUE! 
 Table~\ref{tab:did_clean} reports estimates of (\ref{eq:did_clean}) under
 both control specifications. Under \textsc{Total} controls, the relief
 interaction is $\hat{\mu}_2 = -10.76$ basis points (SE $= 1.15$,
@@ -532,7 +625,7 @@ differential compression of Treasury-based spreads is orthogonal to
 SOFR dynamics. This stability---not the baseline coefficient---is the
 paper's key identification claim.
 
-\subsection{The Entry Event and COVID Contamination}
+\subsubsection{The Entry Event and COVID Contamination}
 \label{sec:entry}
 
 I now turn to the entry event (April 1, 2020). The event-window
@@ -589,7 +682,7 @@ balance-sheet channel. The entry event-window estimates are reported
 in Table~\ref{tab:pooled_jump} for completeness, with an explicit
 flag that the pre-period is contaminated.
 
-\subsection{Falsification: Non-Treasury Series as Controls}
+\subsubsection{Falsification: Non-Treasury Series as Controls}
 \label{sec:falsification}
 
 A central feature of my design is that CIP deviations and equity
@@ -675,7 +768,7 @@ and confirms that the entry-period CIP responses are attributable to the
 dollar funding channel rather than the balance-sheet channel operative
 for Treasuries.
 
-\subsection{Series-Level Evidence}
+\subsubsection{Series-Level Evidence}
 \label{sec:series}
 
 Table~\ref{tab:series_level} reports the series-level estimates of
@@ -786,7 +879,7 @@ consistent across all three tenors---but it warrants the caveat that the TIPS
 channel is empirically more complex than the spot-futures channel and is likely
 contaminated by QE and inflation dynamics in this specific sample window.
 
-\subsection{Robustness}
+\subsubsection{Robustness}
 \label{sec:robustness}
 
 Table~\ref{tab:robustness} presents a systematic comparison of
@@ -987,7 +1080,7 @@ autocorrelation correction, though a formal sensitivity analysis with
 20 or more lags would further address this concern for the long
 time-series panels used in the clean DiD.
 
-\begin{table}[htbp]
+\begin{table}[h]
 \centering
 \caption{Summary Statistics for Arbitrage Spreads}
 \label{tab:summary_stats}
@@ -1224,7 +1317,7 @@ or 3.8 percent.
 \section{Conclusion}
 \label{sec:conclusion}
 
-This paper asks whether regulatory leverage constraints are the operative
+This paper investigates whether regulatory leverage constraints are the operative
 friction behind Treasury market arbitrage dislocations. Using the Federal
 Reserve's 2020--2021 SLR exclusion as a time-dated quasi-experiment, I find
 that the expiry of regulatory relief caused Treasury-based arbitrage spreads to
@@ -1280,4 +1373,5 @@ response of each spread to be estimated flexibly over post-event horizons,
 which would be informative about the speed of arbitrage capital reallocation
 following the regulatory change.
 
+\bibliography{nsf_references}
 \end{document}

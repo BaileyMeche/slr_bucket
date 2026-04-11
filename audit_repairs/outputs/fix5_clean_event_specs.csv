@@ -1,0 +1,6 @@
+event,window,window_type,lo,hi,include_in_main_table,note
+2020-04-01,20,symmetric,-20,20,True,
+2020-04-01,60,symmetric,-60,60,True,
+2021-03-31,20,symmetric,-20,20,True,
+2021-03-31,60,symmetric,-60,60,True,
+2021-03-19,7,one_sided_post,0,7,False,"announcement window [0,+7] t.d. only (avoids overlap with 2021-03-31)"
