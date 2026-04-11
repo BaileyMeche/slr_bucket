@@ -57,10 +57,12 @@ The expiry of the exclusion is the paper's cleanest identification. When the
 relief expired, Treasury-based spreads widened by $3.84$ basis points more
 than non-Treasury spreads in the subsequent 60 trading days
 (HAC $t = 4.32$, $p < 0.01$), a result that is stable to the
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post×TreasuryBased row: coef=+3.84, SE=0.89, t=4.32 [audit_repairs/outputs/jump_estimates_pooled.csv]
 one-hundredth of a basis point whether or not secured overnight funding
 controls are added. A full-period difference-in-differences using the
 2019 pre-COVID baseline recovers $-10.76$ basis points of differential
 Treasury compression during the relief window ($t = -9.37$). Non-Treasury
+% SOURCE: tab:did_clean Panel A, TOTAL, mu2 row: coef=-10.76, SE=1.15, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv]
 series (CIP deviations and equity spot-futures) show no comparable break
 at the SLR event dates, consistent with balance-sheet segmentation rather
 than a general intermediary-health shock. These results provide direct
@@ -305,6 +307,7 @@ Section~\ref{sec:did_clean}, which uses the 2019 pre-COVID calendar year
 as the baseline and is entirely pre-treatment by construction. Under that
 design, the non-Treasury baseline during the relief period is
 $\hat{\mu}_1 = -1.34$ bps ($t = -1.19$), statistically indistinguishable
+% SOURCE: tab:did_clean Panel A, TOTAL, mu1 row: coef=-1.34, SE=1.13, t=-1.19 [audit_repairs/outputs/did_clean_baseline.csv]
 from zero. This indicates that non-Treasury spread levels did not shift
 systematically between the 2019 pre-period and the relief period beyond
 what the risk controls explain---a result consistent with the
@@ -323,9 +326,11 @@ $\mathrm{Post}_t$ with event-time bin indicators---to characterize the
 within-window spread dynamics around the exit date. The results are in
 Table~\ref{tab:pretrend}. The significant negative pre-event interaction
 coefficients ($F = 9.92$, $p < 0.001$) confirm that Treasury-based spreads
+% SOURCE: tab:pretrend, F-test row (6 pre-event leads): F=9.92, p<0.001 [investigation_outputs/pretrend_regression_results.csv]
 were actively compressing relative to their all-period mean throughout the
 pre-window: this is the treatment effect in progress, not a pre-trend
 divergence. The post-event lag coefficients are mixed: bins $[{+}0, {+}9]$ through $[{+}20, {+}29]$ are small and insignificant (range: $-0.70$ to $+0.69$ bps), bin $[{+}30, {+}39]$ is significantly negative ($-2.77$ bps, $t = -3.12$), and the final bin $[{+}50, {+}60]$ is significantly positive ($+2.19$ bps, $t = 2.43$). This non-monotone pattern is consistent with within-window mean-reversion dynamics at the series fixed-effect level and does not contradict the pooled level-shift estimate of $\hat{\beta} = +3.84$ bps, which directly compares the pre-expiry and post-expiry within-window means.
+% SOURCE: tab:pretrend all post-event bins: [+0,+9]=+0.56(t=+0.53), [+10,+19]=+0.69(t=+0.78), [+20,+29]=-0.70(t=-0.77), [+30,+39]=-2.77(t=-3.12), [+40,+49]=-1.17(t=-1.46), [+50,+60]=+2.19(t=+2.43) [investigation_outputs/pretrend_regression_results.csv]
 
 \begin{table}[htbp]
 \centering
@@ -372,6 +377,7 @@ relief period. This is not a parallel-trends violation; the valid
 parallel-trends test is the clean DiD with the 2019 pre-COVID baseline
 (Section~\ref{sec:did_clean}), which yields $\hat{\mu}_1 = -1.34$ bps
 ($t = -1.19$, not significant).
+% SOURCE: tab:did_clean Panel A, TOTAL, mu1 row: coef=-1.34, SE=1.13, t=-1.19 [audit_repairs/outputs/did_clean_baseline.csv]
 \end{tablenotes}
 \end{table}
 
@@ -411,8 +417,10 @@ differential response at expiry.
 The estimated interaction coefficient at $W = 60$ under the \textsc{Total}
 specification is $\hat{\beta} = +3.84$ basis points (HAC SE $= 0.89$,
 $t = 4.32$), significant at the one-percent level. The \textsc{Direct}
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post×TreasuryBased: coef=+3.84, SE=0.89, t=4.32; also tab:robustness row 8; also tab:dk_robustness Exit TOTAL Post×Treas [audit_repairs/outputs/jump_estimates_pooled.csv]
 specification, which adds SOFR and TGCR-SOFR controls, yields
 $\hat{\beta} = +3.84$ basis points (SE $= 0.88$, $t = 4.34$). These
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 DIRECT, Post×TreasuryBased: coef=+3.84, SE=0.88, t=4.34; also tab:robustness row 8; tab:dk_robustness Exit DIRECT t_NW=4.34 [audit_repairs/outputs/jump_estimates_pooled.csv]
 estimates are identical to two decimal places. The negligible difference
 between the \textsc{Total} and \textsc{Direct} specifications is
 informative: adding secured overnight funding rate controls does not
@@ -423,14 +431,18 @@ channel orthogonal to secured funding market conditions. This stability rules ou
 
 The results are equally stable at the narrower $W = 20$ window:
 $\hat{\beta} = +3.91$ basis points (SE $= 0.92$, $t = 4.26$) under
+% SOURCE: tab:pooled_jump Panel A, Exit W=20 TOTAL, Post×TreasuryBased: coef=+3.91, SE=0.92; tab:robustness Exit W=20 Post×Treas TOTAL: t=+4.26 [audit_repairs/outputs/jump_estimates_pooled.csv]
 \textsc{Total} and $+3.90$ basis points (SE $= 0.92$, $t = 4.24$) under
+% SOURCE: tab:pooled_jump Panel A, Exit W=20 DIRECT, Post×TreasuryBased: coef=+3.90, SE=0.92; tab:robustness Exit W=20 Post×Treas DIRECT: t=+4.24 [audit_repairs/outputs/jump_estimates_pooled.csv]
 \textsc{Direct}. The insensitivity to window choice further supports the
 conclusion that the Treasury differential reflects a discrete regime
 shift rather than noise.
 
 The non-Treasury baseline coefficient $\hat{\gamma}$ at $W = 60$
 is $-3.09$ basis points (\textsc{Total}, $t = -3.72$) and $-2.97$ basis
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post: coef=-3.09, SE=0.83, t=-3.72; tab:dk_robustness Exit TOTAL Post: t_NW=-3.72 [audit_repairs/outputs/jump_estimates_pooled.csv]
 points (\textsc{Direct}, $t = -3.48$). Non-Treasury spreads were
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 DIRECT, Post: coef=-2.97, SE=0.85, t=-3.48; tab:dk_robustness Exit DIRECT Post: t_NW=-3.48 [audit_repairs/outputs/jump_estimates_pooled.csv]
 therefore continuing to compress slightly in the post-expiry window,
 reflecting the ongoing secular normalization of cross-currency bases
 documented by \citet{du2018deviations}. This compression makes
@@ -531,13 +543,14 @@ vs.\ $-10.77$ bps). See Section~\ref{sec:did_clean} for discussion.
 \end{table}
 
 
-%% ISSUE! 
 Table~\ref{tab:did_clean} reports estimates of (\ref{eq:did_clean}) under
 both control specifications. Under \textsc{Total} controls, the relief
 interaction is $\hat{\mu}_2 = -10.76$ basis points (SE $= 1.15$,
 $t = -9.37$), significant at the one-percent level. The non-Treasury
+% SOURCE: tab:did_clean Panel A, TOTAL, mu2 row: coef=-10.76, SE=1.15, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv; csv value: coef=-10.763, se=1.1491, t=-9.366]
 baseline change during the relief period is $\hat{\mu}_1 = -1.34$
 basis points (SE $= 1.13$, $t = -1.19$), which is economically small
+% SOURCE: tab:did_clean Panel A, TOTAL, mu1 row: coef=-1.34, SE=1.13, t=-1.19 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-1.3403, se=1.1294, t=-1.187]
 and statistically indistinguishable from zero. This is consistent with
 the parallel-trends assumption: non-Treasury spread levels did not move
 differentially between 2019 and the relief period, suggesting the two
@@ -561,6 +574,7 @@ compression over a year-long relief horizon.
 
 For the post-relief period, the interaction is $\hat{\mu}_4 = -9.03$
 basis points (SE $= 1.16$, $t = -7.79$). This coefficient measures the
+% SOURCE: tab:did_clean Panel B, TOTAL, mu4 row: coef=-9.03, SE=1.16, t=-7.79 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-9.026, se=1.1588, t=-7.789]
 Treasury differential in the April-December 2021 post-relief period
 relative to 2019, and its magnitude indicates that Treasury-based spreads
 did not fully return to their pre-SLR-exclusion levels following expiry.
@@ -577,8 +591,10 @@ I formally test whether the compression during the relief period equals the
 residual compression post-relief by computing $\hat{\mu}_2 - \hat{\mu}_4 =
 -10.76 - (-9.03) = -1.73$ basis points. A Wald test of $H_0\colon \mu_2 = \mu_4$
 yields $F(1, 12{,}301) = 2.56$, $p = 0.11$, so the two interaction coefficients
+% SOURCE: investigation_outputs/reversion_test_results.txt: F(1,12301)=2.56, p=0.11 [investigation_outputs/task3_reversion.py]
 are not statistically distinguishable at conventional significance levels
 (95\% CI for the difference: $[-3.86, +0.39]$ bps).
+% SOURCE: investigation_outputs/reversion_test_results.txt: 95% CI [-3.86, +0.39] bps [investigation_outputs/task3_reversion.py]
 The point estimate implies that
 approximately $1.73 / 10.76 \approx 16$ percent of the relief-period
 compression reversed following expiry, with the remaining 84 percent
@@ -597,7 +613,9 @@ exclusion, explaining why spreads did not fully revert.}
 
 The \textsc{Direct} specification yields nearly identical results:
 $\hat{\mu}_2 = -10.77$ basis points (SE $= 1.14$, $t = -9.46$) and
+% SOURCE: tab:did_clean Panel A, DIRECT, mu2 row: coef=-10.77, SE=1.14, t=-9.46 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-10.7696, se=1.1379, t=-9.464]
 $\hat{\mu}_4 = -9.04$ basis points (SE $= 1.16$, $t = -7.80$). The
+% SOURCE: tab:did_clean Panel B, DIRECT, mu4 row: coef=-9.04, SE=1.16, t=-7.80 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-9.0448, se=1.16, t=-7.797]
 sub-basis-point differences between \textsc{Total} and \textsc{Direct}
 coefficients replicate the stability documented in the exit event-window
 regressions and confirm that secured funding rate controls are irrelevant
@@ -605,11 +623,13 @@ to the Treasury differential in either regime.
 
 The non-Treasury baseline does shift substantially between specifications:
 $\hat{\mu}_1$ moves from $-1.34$ bps (\textsc{Total}) to $-11.03$ bps
+% SOURCE: tab:did_clean Panel A: TOTAL mu1=-1.34 (SE=1.13), DIRECT mu1=-11.03 (SE=2.97) [audit_repairs/outputs/did_clean_baseline.csv]
 (\textsc{Direct}), a change of nearly 10 basis points. This shift
 reflects the relationship between non-Treasury arbitrage spreads and the
 secured overnight funding rate (SOFR). Empirically, the estimated
 coefficient on SOFR in the non-Treasury spread regression is $-0.82$ bps
 per percentage point ($t = -3.56$), meaning that higher SOFR is
+% SOURCE: investigation_outputs/direct_baseline_explanation.txt: SOFR coef=-0.82, t=-3.56 [investigation_outputs/task5_direct_baseline.py] — NOT in any draft table
 associated with \emph{lower} non-Treasury $|W|$ across the sample.
 SOFR fell sharply during the relief period---from approximately 2.4
 percent in 2019 to near zero---implying that, holding all else fixed,
@@ -631,12 +651,15 @@ paper's key identification claim.
 I now turn to the entry event (April 1, 2020). The event-window
 specification at $W = 60$ yields $\hat{\beta} = -4.54$ basis points
 (\textsc{Total}, SE $= 3.00$, $t = -1.51$) and $\hat{\beta} = -4.52$
+% SOURCE: tab:pooled_jump Panel A, Entry W=60 TOTAL, Post×TreasuryBased: coef=-4.54, SE=3.00, t=-1.51; tab:dk_robustness Entry TOTAL Post×Treas: SE_NW=3.003, t_NW=-1.51 [audit_repairs/outputs/jump_estimates_pooled.csv]
 basis points (\textsc{Direct}, SE $= 3.00$, $t = -1.51$)---negative as
+% SOURCE: tab:pooled_jump Panel A, Entry W=60 DIRECT, Post×TreasuryBased: coef=-4.52, SE=3.00, t=-1.51; tab:dk_robustness Entry DIRECT Post×Treas: SE_NW=2.995, t_NW=-1.51 [audit_repairs/outputs/jump_estimates_pooled.csv]
 the hypothesis predicts, but not statistically distinguishable from zero
 at conventional significance levels. The narrow $W = 20$ window produces
 smaller and noisier estimates: $\hat{\beta} = -2.16$ and $-2.23$ basis
 points under \textsc{Total} and \textsc{Direct}, respectively, both with
 $t$-statistics below $0.40$.
+% SOURCE: tab:robustness Entry W=20 Post×Treas: TOTAL t=-0.35, DIRECT t=-0.36; tab:pooled_jump Panel A Entry W=20 Post×Treas: coef=-2.16(TOTAL), -2.23(DIRECT) [audit_repairs/outputs/jump_estimates_pooled.csv]
 
 The failure to identify a significant entry effect is not evidence against
 the balance-sheet channel. The pre-period for the $W = 60$ entry window
@@ -651,6 +674,7 @@ These concurrent interventions confound the identification of the
 SLR relief's marginal effect on Treasury spreads. Specifically, the
 non-Treasury baseline coefficient at $W = 60$ shifts from $\hat{\gamma}
 = -7.08$ basis points under \textsc{Total} to $-2.76$ basis points under
+% SOURCE: tab:pooled_jump Panel A, Entry W=60: Post TOTAL=-7.08 (SE=3.05), Post DIRECT=-2.76 (SE=5.54) [audit_repairs/outputs/jump_estimates_pooled.csv]
 \textsc{Direct}---a change of 4.3 basis points---when the SOFR rate and
 TGCR-SOFR spread are added as controls, while the SE of the baseline
 coefficient nearly doubles (3.05 to 5.54). This instability---much
@@ -667,6 +691,7 @@ The clean DiD of Section~\ref{sec:did_clean} resolves this ambiguity.
 By conditioning on the 2019 pre-COVID baseline and excluding the
 February-March 2020 crash period, the design recovers a precisely
 estimated $\hat{\mu}_2 = -10.76$ basis points with $t = -9.37$,
+% SOURCE: tab:did_clean Panel A, TOTAL, mu2: coef=-10.76, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv]
 consistent with the hypothesis that the SLR relief produced substantial
 differential compression in Treasury-based spreads during the exclusion
 period.
@@ -697,6 +722,7 @@ health.
 
 The data strongly support the falsification hypothesis. For the exit event
 at $W = 60$, $\hat{\gamma} = -3.09$ basis points ($t = -3.72$),
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post: coef=-3.09, SE=0.83, t=-3.72 [audit_repairs/outputs/jump_estimates_pooled.csv]
 indicating that non-Treasury spreads continued to compress in the
 post-expiry window on average. This pooled figure masks substantial
 heterogeneity: individual CIP series compress by $-4.3$ to $-6.2$ bps
@@ -720,6 +746,7 @@ basis points, all significant), while CAD, NZD, and GBP showed small,
 mixed, and generally insignificant responses. CIP-AUD is a notable
 exception, exhibiting a significant positive response ($+4.32$ bps,
 $t = 4.19$), attributable to Japanese fiscal year-end effects rather than
+% SOURCE: tab:series_level Panel C, CIP-AUD: coef=+4.32, SE=1.03, t=+4.19 [audit_repairs/outputs/jump_estimates_by_series.csv]
 the SLR expiry---a calendar-driven phenomenon that is structurally
 unrelated to the balance-sheet channel (Classification~B; see
 footnote).%
@@ -738,13 +765,17 @@ not a data error or a treatment-group spillover). Excluding CIP-AUD
 from the pooled regression leaves the primary
 Post$\times$TreasuryBased coefficient essentially unchanged at
 $+3.81$ bps ($t = 4.19$), confirming the falsification design is
+% SOURCE: investigation_outputs/task1_output.txt (pooled regression without CIP-AUD): coef=+3.81, t=4.19 [investigation_outputs/task1_cip_aud.py] — NOT in any draft table
 robust to this series.}
 
 Equity spot-futures spreads showed no response to the SLR expiry. The
 series-level post-coefficients at $W = 60$ under \textsc{Direct} are
 $-0.72$ basis points for SPX (SE $= 1.47$, $t = -0.49$), $-4.47$ basis
+% SOURCE: tab:series_level Panel D, Eq.SPX: coef=-0.72, SE=1.47, t=-0.49 [audit_repairs/outputs/jump_estimates_by_series.csv]
 points for NDX (SE $= 2.64$, $t = -1.69$, marginally significant), and
+% SOURCE: tab:series_level Panel D, Eq.NDX: coef=-4.47, SE=2.64, t=-1.69 [audit_repairs/outputs/jump_estimates_by_series.csv]
 $-0.21$ basis points for INDU (SE $= 1.72$, $t = -0.12$). These
+% SOURCE: tab:series_level Panel D, Eq.INDU: coef=-0.21, SE=1.72, t=-0.12 [audit_repairs/outputs/jump_estimates_by_series.csv]
 estimates are economically small and statistically insignificant in
 aggregate, consistent with the interpretation that equity basis dynamics
 in 2021 were driven by post-COVID dividend normalization rather than
@@ -758,6 +789,7 @@ For the entry event, 5 of 11 non-Treasury series show significant
 compression (CIP-CHF: $-30.9$ bps, $t = -6.4$; CIP-EUR: $-40.4$ bps,
 $t = -5.3$; CIP-GBP: $-13.7$ bps, $t = -5.1$; CIP-SEK: $-28.3$ bps,
 $t = -7.0$; CIP-AUD marginally), while all three equity series are
+% SOURCE: audit_repairs/outputs/jump_estimates_by_series.csv, Entry W=60 DIRECT, individual series — NOT in any draft table; values: CIP-CHF=-30.9(t=-6.4), CIP-EUR=-40.4(t=-5.3), CIP-GBP=-13.7(t=-5.1), CIP-SEK=-28.3(t=-7.0)
 insignificant ($|t| < 0.40$). The large CIP compressions at entry
 reflect the effect of the Federal Reserve's bilateral swap line
 activations rather than the SLR relief---a channel running through the
@@ -776,10 +808,14 @@ Table~\ref{tab:series_level} reports the series-level estimates of
 the $W = 60$ \textsc{Direct} window for the exit event. Three of six
 Treasury-based series show significant re-widening at expiry: UST
 spot-futures 5y ($+4.05$ bps, $t = 2.98$), UST spot-futures 10y ($+4.83$
+% SOURCE: tab:series_level Panel A, UST SF 5y: coef=+4.05, SE=1.36, t=+2.98 [audit_repairs/outputs/jump_estimates_by_series.csv]
 bps, $t = 2.64$), and UST spot-futures 2y ($+2.47$ bps, $t = 1.76$,
+% SOURCE: tab:series_level Panel A, UST SF 10y: coef=+4.83, SE=1.83, t=+2.64 [audit_repairs/outputs/jump_estimates_by_series.csv]
 significant at ten percent). The TIPS-Treasury series show heterogeneous
+% SOURCE: tab:series_level Panel A, UST SF 2y: coef=+2.47, SE=1.41, t=+1.76 [audit_repairs/outputs/jump_estimates_by_series.csv]
 responses: TIPS 2y shows a significant compression of $-8.28$ basis
 points ($t = -2.01$), opposite to the direction the balance-sheet
+% SOURCE: tab:series_level Panel B, TIPS 2y: coef=-8.28, SE=4.12, t=-2.01 [audit_repairs/outputs/jump_estimates_by_series.csv]
 hypothesis predicts, while TIPS 5y and 10y are near zero and insignificant.
 
 The heterogeneity across Treasury-based series is itself informative.
@@ -855,6 +891,7 @@ ${}^{***}\,p<0.01$; ${}^{**}\,p<0.05$; ${}^{*}\,p<0.10$.
 The TIPS~2y series is the one Treasury-based observation inconsistent with the
 balance-sheet hypothesis at expiry: its post-coefficient is $-8.28$ basis
 points ($t = -2.01$), indicating continued compression rather than re-widening.
+% SOURCE: tab:series_level Panel B, TIPS 2y: coef=-8.28, SE=4.12, t=-2.01 [audit_repairs/outputs/jump_estimates_by_series.csv]
 Several non-mutually-exclusive explanations are consistent with this finding.
 First, the Federal Reserve's QE program was actively purchasing TIPS through
 2021 at roughly \$5~billion per month, directly suppressing $y^{\text{TIPS}}_{t,2}$;
@@ -924,6 +961,7 @@ cross-sectional dependence. Standard errors are computed using the
 Bartlett kernel with five lags, matching the main specification.
 The finding that DK standard errors for the exit Treasury interaction are
 \emph{smaller} than Newey-West standard errors (0.68 vs.\ 0.89 bps) deserves
+% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: SE_DK=0.683, SE_NW=0.889 [audit_repairs/outputs/dk_robustness.csv]
 explanation. The Driscoll-Kraay estimator averages score contributions
 cross-sectionally before applying the Bartlett kernel, so residuals that are
 correlated across series within a day are treated as a single daily
@@ -934,22 +972,28 @@ in the $\mathrm{Post} \times \mathrm{TreasuryBased}$ interaction. At entry,
 the opposite pattern holds: the COVID crash induced strong co-movement across
 all arbitrage series, which DK correctly penalizes (DK SE = 6.32 vs.\ NW SE
 = 3.00 bps), correctly reducing the $t$-statistic from $-1.51$ to $-0.72$.
+% SOURCE: tab:dk_robustness, Entry TOTAL Post×Treas: SE_DK=6.323 vs SE_NW=3.003, t_NW=-1.51, t_DK=-0.72 [audit_repairs/outputs/dk_robustness.csv]
 
 Table~\ref{tab:dk_robustness} reports DK standard errors for the key
 coefficients at $W = 60$. For the exit event, the Treasury interaction
 yields $t_{\text{DK}} = +5.62$ (\textsc{Total}) and $+5.65$
 (\textsc{Direct}), compared to $t_{\text{NW}} = +4.32$ and $+4.34$ under
+% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: t_DK=+5.62; Exit DIRECT Post×Treas: t_DK=+5.65; t_NW=+4.32(TOTAL), +4.34(DIRECT) [audit_repairs/outputs/dk_robustness.csv]
 Newey-West. The DK standard error is \emph{smaller} than the NW
 standard error (0.683 vs.\ 0.889 bps) because the cross-sectional
+% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: SE_DK=0.683, SE_NW=0.889 [audit_repairs/outputs/dk_robustness.csv]
 averaging of score contributions removes the common-factor noise while
 retaining the series-specific identifying variation. For the entry
 event, the DK standard error for the Treasury interaction is substantially
 larger (6.32 vs.\ 3.00 bps), reducing $t_{\text{DK}}$ to $-0.72$,
+% SOURCE: tab:dk_robustness, Entry TOTAL Post×Treas: SE_DK=6.323, SE_NW=3.003, t_DK=-0.72, t_NW=-1.51 [audit_repairs/outputs/dk_robustness.csv]
 consistent with the interpretation that the COVID crash induced strong
 cross-sectional co-movement that NW does not fully correct for. The
 non-Treasury baseline at entry remains significant under DK for the
 \textsc{Total} specification ($t_{\text{DK}} = -2.62$), but not for
+% SOURCE: tab:dk_robustness, Entry TOTAL Post: t_DK=-2.62 [audit_repairs/outputs/dk_robustness.csv]
 \textsc{Direct} ($t_{\text{DK}} = -0.64$), consistent with the
+% SOURCE: tab:dk_robustness, Entry DIRECT Post: t_DK=-0.64 [audit_repairs/outputs/dk_robustness.csv]
 interpretation that SOFR controls absorb the funding-channel
 co-movement that drives the entry-period compression of non-Treasury
 spreads.
@@ -1006,6 +1050,7 @@ instead whether some other event contemporaneous with the SLR entry or
 exit differentially affected Treasury-based versus non-Treasury spreads.
 The parallel-trends evidence from the clean DiD 2019 baseline
 (Section~\ref{sec:did_clean}, $\hat{\mu}_1 = -1.34$ bps, $t = -1.19$)
+% SOURCE: tab:did_clean Panel A, TOTAL, mu1: coef=-1.34, SE=1.13, t=-1.19 [audit_repairs/outputs/did_clean_baseline.csv]
 provides the sharpest rebuttal to this concern: Treasury-based and
 non-Treasury spreads were on the same trend before the SLR event and
 diverged only when the relief took effect.
@@ -1031,6 +1076,7 @@ economically small and statistically indistinguishable from zero across
 all exit specifications (e.g., $W=60$ \textsc{Direct}: $\hat{\delta}_{7} =
 -0.001$ bps per billion, SE $= 0.002$; $\hat{\delta}_{30} = -0.003$ bps
 per billion, SE $= 0.004$), and inclusion of these controls does not
+% SOURCE: audit_repairs/outputs/jump_estimates_pooled.csv DIRECT spec control coefficients — NOT tabulated in draft; values from repaired_pipeline.py output [audit_repairs/repaired_pipeline.py]
 meaningfully change the key Treasury interaction (see
 Table~\ref{tab:robustness}). The absence of a supply effect on the
 Treasury differential is consistent with the balance-sheet channel: the
@@ -1075,6 +1121,7 @@ rule of thumb of $T^{1/4}$ lags for a sample of $T \approx 121$ trading
 days suggests $\approx 3$--$4$ lags for the event-window regressions,
 consistent with the choice of five. The Driscoll-Kraay results (which
 strengthen the exit Treasury interaction to $t_{\text{DK}} = 5.62$)
+% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: t_DK=+5.62 [audit_repairs/outputs/dk_robustness.csv]
 provide reassurance that the primary inference is not sensitive to the
 autocorrelation correction, though a formal sensitivity analysis with
 20 or more lags would further address this concern for the long
@@ -1323,11 +1370,14 @@ Reserve's 2020--2021 SLR exclusion as a time-dated quasi-experiment, I find
 that the expiry of regulatory relief caused Treasury-based arbitrage spreads to
 widen by $3.84$ basis points more than non-Treasury spreads in the subsequent
 60 trading days ($t = 4.32$, $p < 0.01$), with the estimate stable to the
+% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post×TreasuryBased: coef=+3.84, SE=0.89, t=4.32 [audit_repairs/outputs/jump_estimates_pooled.csv]
 one-hundredth of a basis point across control structures and robust to
 cross-sectional dependence (Driscoll-Kraay $t = 5.62$). A full-period
+% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: t_DK=+5.62, SE_DK=0.683 [audit_repairs/outputs/dk_robustness.csv]
 difference-in-differences recovers $-10.76$ basis points of differential
 Treasury compression during the relief window relative to the 2019 pre-COVID
 baseline ($t = -9.37$). Non-Treasury series---CIP deviations for eight G-10
+% SOURCE: tab:did_clean Panel A, TOTAL, mu2: coef=-10.76, SE=1.15, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv]
 currencies and equity spot-futures for three major indices---show no comparable
 break at the SLR event dates, passing the falsification tests that are the
 design's primary identification safeguard.
