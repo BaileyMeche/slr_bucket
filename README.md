@@ -262,8 +262,6 @@ print(row[["coef_post_x_treas", "se_post_x_treas", "t_post_x_treas", "n"]].to_st
 ```
 
 ```python
-import pandas as pd
-
 # ── Check 2: Driscoll-Kraay robustness — exit event, W=60, TOTAL ──────────
 # Column name is "event" (not "event_date"); values are "entry"/"exit" strings
 # DK column names: "se_dk_post_x_treas", "t_dk_post_x_treas"
@@ -274,8 +272,6 @@ print(row2[["t_dk_post_x_treas", "se_dk_post_x_treas"]].to_string())
 ```
 
 ```python
-import pandas as pd
-
 # ── Check 3: Clean DiD — TOTAL spec ───────────────────────────────────────
 # This CSV uses "spec" directly; no event/window filter needed
 df3 = pd.read_csv("audit_repairs/outputs/did_clean_baseline.csv")
