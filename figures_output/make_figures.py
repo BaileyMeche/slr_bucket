@@ -1,6 +1,15 @@
 """
-make_figures.py — Publication-quality figures for SLR exclusion paper.
-All 6 figures saved to figures_output/ as PDF + PNG.
+make_figures.py — Publication figures for SLR exclusion paper.
+
+Style: tidyquant / theme_bw() equivalent in matplotlib.
+  - White background, full black frame (all 4 spines)
+  - Light gray grid lines behind data (axes.axisbelow)
+  - Bold axis labels and titles
+  - tidyquant palette: #2C3E50, #E31A1C, #18BC9C, #1F78B4, #CCBE93
+  - Sans-serif font (matches ggplot2 default)
+
+Source style reference:
+  Ross (2020), https://tex.stackexchange.com/a/553954, CC BY-SA 4.0
 """
 
 import matplotlib
@@ -9,38 +18,82 @@ matplotlib.use('Agg')
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
+from matplotlib.patches import Patch
 import pandas as pd
 import numpy as np
 from pathlib import Path
 
-# ── Global style ──────────────────────────────────────────────────────────────
+# ── tidyquant / theme_bw() style ─────────────────────────────────────────────
 mpl.rcParams.update({
-    "font.family":        "serif",
-    "font.serif":         ["Times New Roman", "DejaVu Serif"],
-    "font.size":          10,
-    "axes.titlesize":     10,
-    "axes.labelsize":     9,
-    "xtick.labelsize":    8,
-    "ytick.labelsize":    8,
-    "legend.fontsize":    8,
-    "lines.linewidth":    1.2,
-    "axes.spines.top":    False,
-    "axes.spines.right":  False,
-    "figure.dpi":         300,
-    "savefig.dpi":        300,
-    "savefig.bbox":       "tight",
-    "savefig.pad_inches": 0.05,
+    # Font — ggplot2 default is sans-serif
+    "font.family":          "sans-serif",
+    "font.sans-serif":      ["Arial", "Helvetica Neue", "DejaVu Sans"],
+    "font.size":            11,
+    "font.weight":          "normal",
+
+    # Titles and labels — bold, matching theme() overrides in the source
+    "axes.titlesize":       13,
+    "axes.titleweight":     "bold",
+    "axes.labelsize":       13,
+    "axes.labelweight":     "bold",
+    "xtick.labelsize":      11,
+    "ytick.labelsize":      11,
+
+    # Legend
+    "legend.fontsize":      10,
+    "legend.frameon":       True,
+    "legend.framealpha":    1.0,
+    "legend.edgecolor":     "#cccccc",
+    "legend.borderpad":     0.5,
+    "legend.labelspacing":  0.4,
+
+    # Lines
+    "lines.linewidth":      1.6,
+
+    # theme_bw: full box frame (all 4 spines on)
+    "axes.spines.top":      True,
+    "axes.spines.right":    True,
+    "axes.spines.left":     True,
+    "axes.spines.bottom":   True,
+    "axes.edgecolor":       "black",
+    "axes.linewidth":       0.9,
+    "axes.facecolor":       "white",
+    "figure.facecolor":     "white",
+
+    # Grid — theme_bw light gray, behind data
+    "axes.grid":            True,
+    "axes.axisbelow":       True,
+    "grid.color":           "#e0e0e0",
+    "grid.linestyle":       "-",
+    "grid.linewidth":       0.5,
+
+    # Ticks — outward, small
+    "xtick.direction":      "out",
+    "ytick.direction":      "out",
+    "xtick.major.size":     4,
+    "ytick.major.size":     4,
+    "xtick.major.width":    0.8,
+    "ytick.major.width":    0.8,
+
+    # Output
+    "figure.dpi":           300,
+    "savefig.dpi":          300,
+    "savefig.bbox":         "tight",
+    "savefig.pad_inches":   0.15,
+    "patch.linewidth":      0.7,
 })
 
+# ── tidyquant palette (scale_color_tq "dark") ────────────────────────────────
 COLORS = {
-    "ust":    "#1a3a6b",
-    "tips":   "#2e86ab",
-    "cip":    "#b5451b",
-    "equity": "#5c4a72",
-    "entry":  "#c0392b",
-    "exit":   "#27ae60",
-    "shade":  "#f0f0f0",
-    "ci":     "#aaaaaa",
+    "ust":    "#2c3e50",    # Midnight Blue   (UST SF — Treasury-based)
+    "tips":   "#1f78b4",    # Steel Blue      (TIPS — Treasury-based)
+    "cip":    "#e31a1c",    # Crimson         (CIP — non-Treasury)
+    "equity": "#18bc9c",    # Teal            (Equity — non-Treasury)
+    "entry":  "#e31a1c",    # Crimson         (entry event line)
+    "exit":   "#2c3e50",    # Midnight Blue   (exit event line)
+    "shade":  "#f5f5f5",    # Near-white gray (SLR exclusion band)
+    "ci":     "#cccccc",    # Light gray      (CI bands)
 }
 
 SLR_ENTRY = pd.Timestamp("2020-04-01")
@@ -53,8 +106,6 @@ OUT_DIR.mkdir(exist_ok=True)
 # ── Data loading ──────────────────────────────────────────────────────────────
 
 def load_panel():
-    """Build master long-format panel: date | series_id | strategy | tenor |
-    y_bps | y_abs_bps | treasury_based | regime"""
     records = []
 
     # 1. CIP
@@ -68,136 +119,125 @@ def load_panel():
     for col, tenor in cip_cols.items():
         tmp = cip[["Date", col]].dropna().copy()
         tmp.columns = ["date", "y_bps"]
-        tmp["series_id"] = f"cip_{tenor.lower()}"
-        tmp["strategy"] = "cip"
-        tmp["tenor"] = tenor
+        tmp["series_id"]      = f"cip_{tenor.lower()}"
+        tmp["strategy"]       = "cip"
+        tmp["tenor"]          = tenor
         tmp["treasury_based"] = 0
         records.append(tmp)
 
-    # 2. UST SF (use 2Y, 5Y, 10Y only)
+    # 2. UST SF
     ust = pd.read_csv(REPO_ROOT / "data/series/treasury_sf_output.csv",
                       parse_dates=["Date"])
-    ust_cols = {
-        "Treasury_SF_2Y": "2Y",
-        "Treasury_SF_5Y": "5Y",
-        "Treasury_SF_10Y": "10Y",
-    }
+    ust_cols = {"Treasury_SF_2Y": "2Y", "Treasury_SF_5Y": "5Y", "Treasury_SF_10Y": "10Y"}
     for col, tenor in ust_cols.items():
         tmp = ust[["Date", col]].dropna().copy()
         tmp.columns = ["date", "y_bps"]
-        tmp["series_id"] = f"ust_sf_{tenor.lower()}"
-        tmp["strategy"] = "ust_spot_fut"
-        tmp["tenor"] = tenor
+        tmp["series_id"]      = f"ust_sf_{tenor.lower()}"
+        tmp["strategy"]       = "ust_spot_fut"
+        tmp["tenor"]          = tenor
         tmp["treasury_based"] = 1
         records.append(tmp)
 
-    # 3. TIPS (arb_2, arb_5, arb_10)
+    # 3. TIPS
     tips = pd.read_parquet(REPO_ROOT / "data/series/tips_treasury_implied_rf_2010.parquet")
     tips = tips.reset_index() if tips.index.name == "date" else tips
-    # Ensure date column name
     date_col = "date" if "date" in tips.columns else tips.columns[0]
     tips[date_col] = pd.to_datetime(tips[date_col])
-    tips_cols = {"arb_2": "2Y", "arb_5": "5Y", "arb_10": "10Y"}
-    for col, tenor in tips_cols.items():
+    for col, tenor in {"arb_2": "2Y", "arb_5": "5Y", "arb_10": "10Y"}.items():
         tmp = tips[[date_col, col]].dropna().copy()
         tmp.columns = ["date", "y_bps"]
-        tmp["series_id"] = f"tips_treas_{tenor.lower()}"
-        tmp["strategy"] = "tips"
-        tmp["tenor"] = tenor
+        tmp["series_id"]      = f"tips_treas_{tenor.lower()}"
+        tmp["strategy"]       = "tips"
+        tmp["tenor"]          = tenor
         tmp["treasury_based"] = 1
         records.append(tmp)
 
     # 4. Equity
-    eq_files = {
-        "equity_spot_spread_SPX.csv": ("eq_spx",  "SPX",  "spread_SPX"),
-        "equity_spot_spread_NDX.csv": ("eq_ndx",  "NDX",  "spread_NDX"),
+    for fname, (sid, tenor, col) in {
+        "equity_spot_spread_SPX.csv":  ("eq_spx",  "SPX",  "spread_SPX"),
+        "equity_spot_spread_NDX.csv":  ("eq_ndx",  "NDX",  "spread_NDX"),
         "equity_spot_spread_INDU.csv": ("eq_indu", "INDU", "spread_INDU"),
-    }
-    for fname, (sid, tenor, col) in eq_files.items():
+    }.items():
         df = pd.read_csv(REPO_ROOT / "data/series" / fname, parse_dates=["Date"])
         tmp = df[["Date", col]].dropna().copy()
         tmp.columns = ["date", "y_bps"]
-        tmp["series_id"] = sid
-        tmp["strategy"] = "eq_spot_fut"
-        tmp["tenor"] = tenor
+        tmp["series_id"]      = sid
+        tmp["strategy"]       = "eq_spot_fut"
+        tmp["tenor"]          = tenor
         tmp["treasury_based"] = 0
         records.append(tmp)
 
     panel = pd.concat(records, ignore_index=True)
     panel["date"] = pd.to_datetime(panel["date"])
 
-    # ── CRITICAL unit check ──────────────────────────────────────────────────
+    # Unit check
     ust_pre = panel[
         (panel["strategy"] == "ust_spot_fut") &
         (panel["date"] >= "2019-01-01") &
         (panel["date"] <= "2020-03-31")
     ]["y_bps"].abs().mean()
     print(f"[UNIT CHECK] UST SF pre-period mean |W|: {ust_pre:.2f} bps")
-    if ust_pre > 200:
-        raise ValueError(
-            f"UST SF pre-period mean |W| = {ust_pre:.2f} bps — series appears "
-            "NOT in bps. Halt. Check treasury_sf_output.csv scale."
-        )
-    if ust_pre < 5:
-        raise ValueError(
-            f"UST SF pre-period mean |W| = {ust_pre:.2f} bps — suspiciously small. "
-            "Check data."
-        )
+    if not (5 < ust_pre < 200):
+        raise ValueError(f"UST SF mean {ust_pre:.2f} bps out of expected range [5, 200].")
     print("[UNIT CHECK] PASSED.")
 
-    # ── Restrict to analysis window ─────────────────────────────────────────
+    # Restrict to 2019-2021
     panel = panel[
         (panel["date"] >= "2019-01-01") & (panel["date"] <= "2021-12-31")
     ].copy()
 
-    # ── Winsorise within-series at p1/p99 ──────────────────────────────────
-    def winsorise_series(grp):
+    # Winsorise within-series at p1/p99
+    for sid, grp in panel.groupby("series_id"):
         lo = grp["y_bps"].quantile(0.01)
         hi = grp["y_bps"].quantile(0.99)
-        grp = grp.copy()
-        grp["y_bps"] = grp["y_bps"].clip(lo, hi)
-        return grp
+        panel.loc[grp.index, "y_bps"] = grp["y_bps"].clip(lo, hi)
 
-    panel = panel.groupby("series_id", group_keys=False).apply(winsorise_series)
     panel["y_abs_bps"] = panel["y_bps"].abs()
 
-    # ── Regime labels ───────────────────────────────────────────────────────
-    def assign_regime(d):
-        if d < SLR_ENTRY:
-            return "pre"
-        elif d <= SLR_EXIT:
-            return "relief"
-        else:
-            return "post"
+    # Regime labels
+    def regime(d):
+        if d < SLR_ENTRY:   return "pre"
+        elif d <= SLR_EXIT: return "relief"
+        else:               return "post"
 
-    panel["regime"] = panel["date"].map(assign_regime)
-
+    panel["regime"] = panel["date"].map(regime)
     return panel.reset_index(drop=True)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Shared helpers ────────────────────────────────────────────────────────────
 
 def add_slr_shading(ax):
-    ax.axvspan(SLR_ENTRY, SLR_EXIT, alpha=0.12, color="#cccccc", zorder=0)
-    ax.axvline(SLR_ENTRY, color=COLORS["entry"], ls='--', lw=0.9, zorder=2)
-    ax.axvline(SLR_EXIT,  color=COLORS["exit"],  ls='--', lw=0.9, zorder=2)
+    """Gray band + dashed event lines."""
+    ax.axvspan(SLR_ENTRY, SLR_EXIT, alpha=0.12, color="#aaaaaa", zorder=0)
+    ax.axvline(SLR_ENTRY, color=COLORS["entry"], ls='--', lw=1.0, zorder=2)
+    ax.axvline(SLR_EXIT,  color=COLORS["exit"],  ls='--', lw=1.0, zorder=2)
+
+
+def label_slr_events(ax):
+    """Entry / Exit text just inside the top of the axes — axes-fraction y."""
+    trans = ax.get_xaxis_transform()
+    ax.text(SLR_ENTRY + pd.Timedelta(days=5), 0.96,
+            "Entry", transform=trans,
+            color=COLORS["entry"], fontsize=9, fontweight="bold",
+            va='top', ha='left', clip_on=True)
+    ax.text(SLR_EXIT + pd.Timedelta(days=5), 0.96,
+            "Exit", transform=trans,
+            color=COLORS["exit"], fontsize=9, fontweight="bold",
+            va='top', ha='left', clip_on=True)
 
 
 def format_xaxis(ax):
     ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b '%y"))
     ax.set_xlim(pd.Timestamp("2019-01-01"), pd.Timestamp("2021-12-31"))
-    plt.setp(ax.xaxis.get_majorticklabels(), rotation=30, ha='right', fontsize=7)
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=30, ha='right', fontsize=10)
 
 
 def sig_stars(t):
-    at = abs(t)
-    if at > 2.576:
-        return "***"
-    elif at > 1.960:
-        return "**"
-    elif at > 1.645:
-        return "*"
+    a = abs(t)
+    if a > 2.576: return "***"
+    if a > 1.960: return "**"
+    if a > 1.645: return "*"
     return ""
 
 
@@ -207,118 +247,98 @@ def save_fig(fig, stem):
     print(f"  Saved {stem}.pdf / .png")
 
 
-# ── Figure 1 — Time Series Overview (2×2) ─────────────────────────────────────
+# ── Figure 1 — Time-Series Overview (2×2) ────────────────────────────────────
 
 def fig1_series_overview(panel):
     print("Generating Figure 1...")
+
     strategies = [
-        ("ust_spot_fut", "UST Spot-Futures",  COLORS["ust"]),
-        ("tips",         "TIPS-Treasury",      COLORS["tips"]),
-        ("cip",          "CIP (3m FX)",         COLORS["cip"]),
-        ("eq_spot_fut",  "Equity Spot-Futures", COLORS["equity"]),
+        ("ust_spot_fut", "UST Spot-Futures",   COLORS["ust"]),
+        ("tips",         "TIPS-Treasury",       COLORS["tips"]),
+        ("cip",          "CIP (3-month)",        COLORS["cip"]),
+        ("eq_spot_fut",  "Equity Spot-Futures",  COLORS["equity"]),
     ]
 
-    fig, axes = plt.subplots(2, 2, figsize=(7.5, 5.5), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(8.0, 5.5), sharex=True)
     axes_flat = axes.flatten()
 
     for idx, (strat, title, color) in enumerate(strategies):
         ax = axes_flat[idx]
-        sub = panel[panel["strategy"] == strat].copy()
-        grp = (sub.groupby("date")["y_abs_bps"]
-                  .agg(["mean", "std"])
-                  .reset_index()
-                  .sort_values("date"))
-
-        grp["mean_sm"] = grp["mean"].rolling(5, min_periods=1).mean()
-        grp["std_sm"]  = grp["std"].rolling(5,  min_periods=1).mean()
+        sub = (panel[panel["strategy"] == strat]
+               .groupby("date")["y_abs_bps"]
+               .agg(["mean", "std"])
+               .reset_index()
+               .sort_values("date"))
+        sub["mean_sm"] = sub["mean"].rolling(5, min_periods=1).mean()
+        sub["std_sm"]  = sub["std"].rolling(5,  min_periods=1).mean()
 
         add_slr_shading(ax)
-        ax.fill_between(grp["date"],
-                        grp["mean_sm"] - grp["std_sm"],
-                        grp["mean_sm"] + grp["std_sm"],
-                        alpha=0.2, color=color, lw=0)
-        ax.plot(grp["date"], grp["mean_sm"], color=color, lw=1.2, label=title)
+        ax.fill_between(sub["date"],
+                        sub["mean_sm"] - sub["std_sm"],
+                        sub["mean_sm"] + sub["std_sm"],
+                        alpha=0.20, color=color, lw=0)
+        ax.plot(sub["date"], sub["mean_sm"], color=color, lw=1.8)
 
         if idx == 0:
-            ymax = ax.get_ylim()[1]
-            ax.text(SLR_ENTRY + pd.Timedelta(days=5), 0.93,
-                    "Entry", transform=ax.get_xaxis_transform(),
-                    color=COLORS["entry"], fontsize=7, va='top')
-            ax.text(SLR_EXIT + pd.Timedelta(days=5), 0.93,
-                    "Exit", transform=ax.get_xaxis_transform(),
-                    color=COLORS["exit"], fontsize=7, va='top')
+            label_slr_events(ax)
 
-        ax.set_title(title, fontsize=9)
-        ax.set_ylabel("Spread |W| (bps)", fontsize=8)
+        ax.set_title(title, fontsize=12, fontweight="bold", pad=5)
+        ax.set_ylabel("|W| (bps)", fontsize=11, fontweight="bold")
         format_xaxis(ax)
 
-    fig.tight_layout(pad=1.2)
+    fig.text(0.5, -0.01,
+             "Gray band: SLR exclusion (Apr 2020\u2013Mar 2021). "
+             "Dashed lines: entry (red) and exit (navy).",
+             ha='center', va='top', fontsize=9, color='#444444', style='italic')
+
+    fig.tight_layout(pad=1.4)
     save_fig(fig, "fig1_series_overview")
     plt.close(fig)
-
-    # Caption file
-    caption = (
-        "Figure 1. Time-series evolution of arbitrage spreads, 2019–2021. "
-        "Each panel shows the cross-series mean (solid line) and ±1 standard deviation band (shaded) "
-        "of absolute spread |W| in basis points, smoothed with a 5-day rolling average. "
-        "The gray shaded region denotes the SLR exclusion relief period (April 1, 2020 – March 31, 2021). "
-        "Dashed vertical lines mark the entry (red) and exit (green) dates."
-    )
-    (OUT_DIR / "fig1_series_overview_caption.txt").write_text(caption)
     print("  Caption saved.")
 
 
-# ── Figure 2 — UST SF Detail by Tenor ─────────────────────────────────────────
+# ── Figure 2 — UST SF Detail by Tenor ────────────────────────────────────────
 
 def fig2_ust_sf_detail(panel):
     print("Generating Figure 2...")
 
-    tenors = [
-        ("2Y", "#1a3a6b", "solid",  "2-year"),
-        ("5Y", "#2c5282", "dashed", "5-year"),
-        ("10Y","#4a7ba7", "dotted", "10-year"),
+    # Three shades of the tidyquant navy for within-strategy differentiation
+    tenor_spec = [
+        ("2Y",  "#2c3e50", "solid",   "2-year"),
+        ("5Y",  "#2980b9", "dashed",  "5-year"),
+        ("10Y", "#85c1e9", "dashdot", "10-year"),
     ]
-
-    fig, ax = plt.subplots(1, 1, figsize=(5.0, 3.5))
-    add_slr_shading(ax)
 
     pre_mask = (panel["date"] >= "2019-01-01") & (panel["date"] <= "2020-01-31")
 
-    for tenor, color, ls, label in tenors:
+    fig, ax = plt.subplots(figsize=(6.0, 3.8))
+    add_slr_shading(ax)
+    label_slr_events(ax)
+
+    for tenor, color, ls, label in tenor_spec:
         sid = f"ust_sf_{tenor.lower()}"
         sub = panel[panel["series_id"] == sid].copy().sort_values("date")
         sub["y_sm"] = sub["y_abs_bps"].rolling(5, min_periods=1).mean()
 
-        ax.plot(sub["date"], sub["y_sm"], color=color, ls=ls, lw=1.2, label=label)
-
-        # Pre-period mean reference line
         pre_mean = sub.loc[pre_mask[sub.index], "y_abs_bps"].mean()
-        if np.isfinite(pre_mean):
-            ax.axhline(pre_mean, color=color, ls=':', lw=0.8, alpha=0.6)
-            ax.text(pd.Timestamp("2021-11-01"), pre_mean,
-                    f"{tenor} pre: {pre_mean:.1f}",
-                    color=color, fontsize=6.5, va='center')
+        leg = f"{label}  (pre-mean: {pre_mean:.1f} bps)" if np.isfinite(pre_mean) else label
 
-    ax.set_ylabel("Spread |W| (bps)", fontsize=8)
-    ax.set_title("UST Spot-Futures Spread by Tenor", fontsize=9)
-    ax.legend(loc="upper left", fontsize=7)
+        ax.plot(sub["date"], sub["y_sm"], color=color, ls=ls, lw=1.8, label=leg)
+
+        if np.isfinite(pre_mean):
+            ax.axhline(pre_mean, color=color, ls=':', lw=0.8, alpha=0.5)
+
+    ax.set_ylabel("|W| (bps)", fontsize=12, fontweight="bold")
+    ax.set_title("UST Spot-Futures Spread by Tenor", fontsize=13, fontweight="bold", pad=6)
+    ax.legend(loc="upper left", fontsize=9)
     format_xaxis(ax)
-    fig.tight_layout(pad=0.8)
+    fig.tight_layout(pad=1.0)
     save_fig(fig, "fig2_ust_sf_detail")
     plt.close(fig)
-
-    caption = (
-        "Figure 2. UST spot-futures arbitrage spread by tenor, 2019–2021. "
-        "Lines show the absolute spread |W| for 2-year (solid), 5-year (dashed), "
-        "and 10-year (dotted) maturities, smoothed with a 5-day rolling average. "
-        "Horizontal dotted lines indicate the pre-period mean for each tenor (January 2019 – January 2020). "
-        "The gray shaded region and dashed vertical lines are as in Figure 1."
-    )
-    (OUT_DIR / "fig2_ust_sf_detail_caption.txt").write_text(caption)
     print("  Caption saved.")
 
 
-# ── Figure 3 — Exit Event Window Paths ────────────────────────────────────────
+# ── Figure 3 — Exit Event Window Paths ───────────────────────────────────────
 
 def fig3_exit_event_paths(panel):
     print("Generating Figure 3...")
@@ -326,101 +346,67 @@ def fig3_exit_event_paths(panel):
     EXIT_DATE = pd.Timestamp("2021-03-31")
     W = 60
 
-    # Compute event-time for each series
-    groups = {
-        "UST SF":  ("ust_spot_fut", COLORS["ust"],    "solid"),
-        "TIPS":    ("tips",         COLORS["tips"],   "dashed"),
-        "CIP":     ("cip",          COLORS["cip"],    "solid"),
-        "Equity":  ("eq_spot_fut",  COLORS["equity"], "dashed"),
-    }
-
-    def build_event_paths(strategy_filter, exit_date, w):
+    def event_paths(strategy_filter):
         sub = panel[panel["strategy"] == strategy_filter].copy()
-        series_list = sub["series_id"].unique()
-
-        demeaned_list = []
-        for sid in series_list:
+        dm_list = []
+        for sid in sub["series_id"].unique():
             s = sub[sub["series_id"] == sid].sort_values("date").reset_index(drop=True)
             dates = s["date"].tolist()
-            if exit_date not in dates:
-                # Find nearest
-                idx = np.searchsorted(dates, exit_date)
-                if idx >= len(dates):
+            try:
+                ei = dates.index(EXIT_DATE)
+            except ValueError:
+                ei = int(np.searchsorted(dates, EXIT_DATE))
+                if ei >= len(dates):
                     continue
-                exit_idx = idx
-            else:
-                exit_idx = dates.index(exit_date)
-
-            s["et"] = np.arange(len(s)) - exit_idx
-            s_win = s[(s["et"] >= -w) & (s["et"] <= w)].copy()
-
-            # Demean by pre-window mean
-            pre_mean = s_win.loc[s_win["et"] < 0, "y_abs_bps"].mean()
-            if np.isfinite(pre_mean) and pre_mean != 0:
-                s_win = s_win.copy()
-                s_win["y_dm"] = s_win["y_abs_bps"] - pre_mean
-                demeaned_list.append(s_win[["et", "y_dm"]])
-
-        if not demeaned_list:
+            s["et"] = np.arange(len(s)) - ei
+            w = s[(s["et"] >= -W) & (s["et"] <= W)].copy()
+            pre_mean = w.loc[w["et"] < 0, "y_abs_bps"].mean()
+            if np.isfinite(pre_mean) and pre_mean > 0:
+                w = w.copy()
+                w["yd"] = w["y_abs_bps"] - pre_mean
+                dm_list.append(w[["et", "yd"]])
+        if not dm_list:
             return pd.DataFrame(columns=["et", "mean", "se"])
-
-        all_dm = pd.concat(demeaned_list, ignore_index=True)
-        grp = all_dm.groupby("et")["y_dm"].agg(
+        all_dm = pd.concat(dm_list, ignore_index=True)
+        return all_dm.groupby("et")["yd"].agg(
             mean="mean",
-            se=lambda x: x.std(ddof=1) / np.sqrt(len(x)) if len(x) > 1 else np.nan
+            se=lambda x: x.std(ddof=1) / np.sqrt(max(len(x), 1))
         ).reset_index()
-        return grp
 
-    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(7.0, 3.5), sharey=False)
+    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(8.0, 3.8))
 
-    # Left: Treasury-based
-    for label, (strat, color, ls) in [
-        ("UST SF", ("ust_spot_fut", COLORS["ust"],  "solid")),
-        ("TIPS",   ("tips",         COLORS["tips"], "dashed")),
+    for ax, pairs, panel_title in [
+        (ax_l, [("UST SF", "ust_spot_fut", COLORS["ust"],    "solid"),
+                ("TIPS",   "tips",         COLORS["tips"],   "dashed")],
+         "Treasury-Based Strategies"),
+        (ax_r, [("CIP",    "cip",          COLORS["cip"],    "solid"),
+                ("Equity", "eq_spot_fut",  COLORS["equity"], "dashed")],
+         "Non-Treasury Strategies (Control)"),
     ]:
-        grp = build_event_paths(strat, EXIT_DATE, W)
-        if grp.empty:
-            continue
-        ax_l.plot(grp["et"], grp["mean"], color=color, ls=ls, lw=1.2, label=label)
-        ax_l.fill_between(grp["et"],
-                          grp["mean"] - grp["se"],
-                          grp["mean"] + grp["se"],
-                          alpha=0.20, color=color, lw=0)
+        for label, strat, color, ls in pairs:
+            grp = event_paths(strat)
+            if grp.empty:
+                continue
+            ax.plot(grp["et"], grp["mean"], color=color, ls=ls, lw=1.8, label=label)
+            ax.fill_between(grp["et"],
+                            grp["mean"] - grp["se"],
+                            grp["mean"] + grp["se"],
+                            alpha=0.18, color=color, lw=0)
 
-    ax_l.axvline(0, color='black', ls='--', lw=0.8)
-    ax_l.axhline(0, color='gray', ls='-', lw=0.5, alpha=0.5)
-    ax_l.set_xlabel("Trading Days Relative to SLR Exit (March 31, 2021)", fontsize=8)
-    ax_l.set_ylabel("Demeaned |W| (bps)", fontsize=8)
-    ax_l.set_title("Treasury-Based Strategies", fontsize=9)
-    ax_l.legend(fontsize=7)
-
-    # Right: Non-Treasury
-    for label, (strat, color, ls) in [
-        ("CIP",    ("cip",         COLORS["cip"],    "solid")),
-        ("Equity", ("eq_spot_fut", COLORS["equity"], "dashed")),
-    ]:
-        grp = build_event_paths(strat, EXIT_DATE, W)
-        if grp.empty:
-            continue
-        ax_r.plot(grp["et"], grp["mean"], color=color, ls=ls, lw=1.2, label=label)
-        ax_r.fill_between(grp["et"],
-                          grp["mean"] - grp["se"],
-                          grp["mean"] + grp["se"],
-                          alpha=0.20, color=color, lw=0)
-
-    ax_r.axvline(0, color='black', ls='--', lw=0.8)
-    ax_r.axhline(0, color='gray', ls='-', lw=0.5, alpha=0.5)
-    ax_r.set_xlabel("Trading Days Relative to SLR Exit (March 31, 2021)", fontsize=8)
-    ax_r.set_ylabel("Demeaned |W| (bps)", fontsize=8)
-    ax_r.set_title("Non-Treasury Strategies (Control)", fontsize=9)
-    ax_r.legend(fontsize=7)
+        ax.axvline(0, color='black', ls='--', lw=0.9)
+        ax.axhline(0, color='#888888', ls='-', lw=0.5)
+        ax.set_xlabel("Trading days relative to SLR exit",
+                      fontsize=12, fontweight="bold")
+        ax.set_ylabel("Demeaned |W| (bps)", fontsize=12, fontweight="bold")
+        ax.set_title(panel_title, fontsize=12, fontweight="bold", pad=5)
+        ax.legend(fontsize=9, loc="upper left")
 
     fig.tight_layout(pad=1.0)
     save_fig(fig, "fig3_exit_event_paths")
     plt.close(fig)
 
 
-# ── Figure 4 — Coefficient Plot (Forest Plot) ─────────────────────────────────
+# ── Figure 4 — Coefficient Forest Plot ───────────────────────────────────────
 
 def fig4_coef_plot():
     print("Generating Figure 4...")
@@ -430,21 +416,16 @@ def fig4_coef_plot():
 
     did_path = REPO_ROOT / "audit_repairs/outputs/did_clean_baseline.csv"
     did_exists = did_path.exists()
+    did = pd.read_csv(did_path) if did_exists else None
     if did_exists:
-        did = pd.read_csv(did_path)
-        print("  Using did_clean_baseline.csv for DiD rows.")
+        print("  Using did_clean_baseline.csv.")
     else:
-        print("  did_clean_baseline.csv not found — using HARDCODED_FALLBACK values.")
+        print("  did_clean_baseline.csv not found — using fallback values.")
 
-    # Build rows list: (label, coef, se, color_group)
     rows = []
-
-    EXIT_DATE = pd.Timestamp("2021-03-31")
-    ENTRY_DATE = pd.Timestamp("2020-04-01")
-
-    for event_date, group_label, color_key in [
-        (EXIT_DATE,  "Exit Event",  COLORS["ust"]),
-        (ENTRY_DATE, "Entry Event", COLORS["cip"]),
+    for event_date, group_label, color in [
+        (pd.Timestamp("2021-03-31"), "Exit Event",  COLORS["ust"]),
+        (pd.Timestamp("2020-04-01"), "Entry Event", COLORS["cip"]),
     ]:
         for w in [60, 20]:
             for spec in ["TOTAL", "DIRECT"]:
@@ -456,532 +437,298 @@ def fig4_coef_plot():
                 if sub.empty:
                     continue
                 r = sub.iloc[0]
-                rows.append({
-                    "label": f"W={w} {spec}",
-                    "coef":  r["coef_post_x_treas"],
-                    "se":    r["se_post_x_treas"],
-                    "group": group_label,
-                    "color": color_key,
-                })
+                rows.append({"label": f"W={w}, {spec}", "coef": r["coef_post_x_treas"],
+                              "se": r["se_post_x_treas"], "group": group_label, "color": color})
 
-    # DiD rows
-    did_color = "#27ae60"
+    did_color = COLORS["tips"]
     if did_exists:
         for _, row in did.iterrows():
-            spec = row["spec"]
-            rows.append({
-                "label": f"Relief×Treas {spec}",
-                "coef":  row["coef_relief_x_treas"],
-                "se":    row["se_relief_x_treas"],
-                "group": "Full-sample DiD",
-                "color": did_color,
-            })
-            rows.append({
-                "label": f"PostRelief×Treas {spec}",
-                "coef":  row["coef_post_relief_x_treas"],
-                "se":    row["se_post_relief_x_treas"],
-                "group": "Full-sample DiD",
-                "color": did_color,
-            })
+            sp = row["spec"]
+            rows.append({"label": f"Relief\u00d7Treas, {sp}",
+                         "coef": row["coef_relief_x_treas"],
+                         "se":   row["se_relief_x_treas"],
+                         "group": "Full-Period DiD", "color": did_color})
+            rows.append({"label": f"PostRelief\u00d7Treas, {sp}",
+                         "coef": row["coef_post_relief_x_treas"],
+                         "se":   row["se_post_relief_x_treas"],
+                         "group": "Full-Period DiD", "color": did_color})
     else:
-        # HARDCODED_FALLBACK
-        fallback = [
-            ("Relief×Treas TOTAL",       -10.76, 1.15),
-            ("Relief×Treas DIRECT",      -10.77, 1.14),
-            ("PostRelief×Treas TOTAL",    -9.03, 1.16),
-            ("PostRelief×Treas DIRECT",   -9.04, 1.16),
-        ]
-        for label, coef, se in fallback:
+        for label, coef, se in [
+            ("Relief\u00d7Treas, TOTAL",       -10.76, 1.15),
+            ("Relief\u00d7Treas, DIRECT",       -10.77, 1.14),
+            ("PostRelief\u00d7Treas, TOTAL",     -9.03, 1.16),
+            ("PostRelief\u00d7Treas, DIRECT",    -9.04, 1.16),
+        ]:
             rows.append({"label": label, "coef": coef, "se": se,
-                         "group": "Full-sample DiD", "color": did_color})
+                         "group": "Full-Period DiD", "color": did_color})
 
-    # Assign y positions with gaps between groups
-    groups_order = ["Exit Event", "Entry Event", "Full-sample DiD"]
-    y_pos = []
-    y = 0
-    prev_group = None
+    # Insert bold header rows before each new group
+    rows_h = []
+    prev = None
     for r in rows:
-        if prev_group is not None and r["group"] != prev_group:
-            y += 0.5  # gap between groups
-        y_pos.append(y)
-        y += 1
-        prev_group = r["group"]
+        if r["group"] != prev:
+            rows_h.append({"label": r["group"], "coef": None, "se": None,
+                           "group": r["group"], "color": r["color"], "is_hdr": True})
+            prev = r["group"]
+        r2 = dict(r); r2["is_hdr"] = False
+        rows_h.append(r2)
 
-    fig, ax = plt.subplots(figsize=(6.0, 5.5))
+    yp = list(range(len(rows_h)))
 
-    group_label_positions = {}
-    for i, r in enumerate(rows):
-        grp = r["group"]
-        if grp not in group_label_positions:
-            group_label_positions[grp] = []
-        group_label_positions[grp].append(y_pos[i])
+    fig, ax = plt.subplots(figsize=(6.8, 5.5))
 
-    # Draw points
-    for i, (r, yp) in enumerate(zip(rows, y_pos)):
-        coef = r["coef"]
-        se   = r["se"]
-        t    = coef / se if se > 0 else 0
-        ci_lo = coef - 1.96 * se
-        ci_hi = coef + 1.96 * se
+    for i, (r, y) in enumerate(zip(rows_h, yp)):
+        if r["is_hdr"]:
+            if i > 0:
+                ax.axhline(y - 0.5, color='#cccccc', lw=0.8, zorder=0)
+            continue
+        coef, se = r["coef"], r["se"]
+        t = coef / se if se > 0 else 0
+        ci_lo, ci_hi = coef - 1.96 * se, coef + 1.96 * se
         stars = sig_stars(t)
+        fs = 'none' if abs(t) <= 1.645 else 'full'
 
-        hollow = abs(t) <= 1.645
-        fmt = 'o'
-        fs  = 'none' if hollow else 'full'
-
-        ax.errorbar(coef, yp,
-                    xerr=[[coef - ci_lo], [ci_hi - coef]],
-                    fmt=fmt, color=r["color"], fillstyle=fs,
-                    ms=5, capsize=2, elinewidth=0.8, lw=0.8)
-
+        ax.errorbar(coef, y, xerr=[[coef - ci_lo], [ci_hi - coef]],
+                    fmt='o', color=r["color"], fillstyle=fs,
+                    ms=6, capsize=3, elinewidth=1.1, lw=1.1)
         if stars:
-            ax.text(ci_hi + 0.4, yp, stars, va='center', fontsize=7,
-                    color=r["color"])
+            ax.text(ci_hi + 0.5, y, stars, va='center', fontsize=8.5, color=r["color"])
 
-    # Group labels in left margin
-    for grp, positions in group_label_positions.items():
-        mid = np.mean(positions)
-        ax.text(-0.01, mid, grp,
-                transform=ax.get_yaxis_transform(),
-                ha='right', va='center', fontsize=7.5,
-                fontstyle='italic', rotation=90)
+    ax.set_yticks(yp)
+    tick_lbls = ax.set_yticklabels([r["label"] for r in rows_h], fontsize=9)
+    for lbl, r in zip(tick_lbls, rows_h):
+        if r["is_hdr"]:
+            lbl.set_fontweight("bold"); lbl.set_fontstyle("italic")
+            lbl.set_fontsize(10);      lbl.set_color("#222222")
 
-    # y-axis tick labels
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels([r["label"] for r in rows], fontsize=7.5)
     ax.invert_yaxis()
-    ax.axvline(0, color='gray', ls='--', lw=0.8)
-    ax.set_xlabel("Estimated Post × Treasury (basis points)", fontsize=8)
-    ax.set_title("Pooled DiD Estimates: Post × Treasury Coefficient", fontsize=9)
+    ax.axvline(0, color='#555555', ls='--', lw=0.9)
+    ax.set_xlabel("Post \u00d7 Treasury coefficient (basis points)",
+                  fontsize=12, fontweight="bold")
+    ax.set_title("Pooled DiD Estimates: Post \u00d7 Treasury",
+                 fontsize=13, fontweight="bold", pad=7)
 
-    fig.tight_layout(pad=1.0)
+    fig.tight_layout(pad=1.3)
     save_fig(fig, "fig4_coef_plot")
     plt.close(fig)
 
 
-# ── Figure 5 — Series-Level Coefficients ──────────────────────────────────────
+# ── Figure 5 — Series-Level Coefficients ─────────────────────────────────────
 
 def fig5_series_level_coefs():
     print("Generating Figure 5...")
 
     by_series = pd.read_csv(REPO_ROOT / "audit_repairs/outputs/jump_estimates_by_series.csv")
-
-    # Filter to exit W=60 DIRECT
     sub = by_series[
         (by_series["window"] == 60) &
         (by_series["spec"] == "DIRECT") &
         (by_series["event"] == "2021-03-31")
     ].copy()
 
-    # Add tenor for sorting UST/TIPS
-    def get_tenor_num(sid):
-        for t in ["2y", "5y", "10y", "20y"]:
-            if t in sid:
-                return int(t.replace("y", ""))
+    def tenor_num(sid):
+        for t in ["2y", "5y", "10y"]:
+            if t in sid: return int(t[:-1])
         return 99
 
-    sub["tenor_num"] = sub["series_id"].apply(get_tenor_num)
+    sub["tn"] = sub["series_id"].apply(tenor_num)
 
-    # Build ordered list: UST SF → TIPS → CIP → Equity
-    ust_rows  = sub[sub["strategy"] == "ust_spot_fut"].sort_values("tenor_num")
-    tips_rows = sub[sub["strategy"] == "tips_treas"].sort_values("tenor_num")
-    cip_rows  = sub[sub["strategy"] == "cip"].sort_values("coef_post", ascending=False)
-    eq_rows   = sub[sub["strategy"] == "eq_spot_fut"].sort_values("series_id")
+    ordered = pd.concat([
+        sub[sub["strategy"] == "ust_spot_fut"].sort_values("tn"),
+        sub[sub["strategy"] == "tips_treas"].sort_values("tn"),
+        sub[sub["strategy"] == "cip"].sort_values("coef_post", ascending=False),
+        sub[sub["strategy"] == "eq_spot_fut"].sort_values("series_id"),
+    ], ignore_index=True)
 
-    ordered = pd.concat([ust_rows, tips_rows, cip_rows, eq_rows], ignore_index=True)
-
-    # Nice labels
-    label_map = {
-        "ust_sf_2y": "UST SF 2Y", "ust_sf_5y": "UST SF 5Y", "ust_sf_10y": "UST SF 10Y",
-        "tips_treas_2y": "TIPS 2Y", "tips_treas_5y": "TIPS 5Y", "tips_treas_10y": "TIPS 10Y",
-        "cip_aud": "CIP AUD", "cip_cad": "CIP CAD", "cip_chf": "CIP CHF",
-        "cip_eur": "CIP EUR", "cip_gbp": "CIP GBP", "cip_jpy": "CIP JPY",
-        "cip_nzd": "CIP NZD", "cip_sek": "CIP SEK",
+    LABEL = {
+        "ust_sf_2y": "UST SF 2Y",    "ust_sf_5y": "UST SF 5Y",
+        "ust_sf_10y": "UST SF 10Y",  "tips_treas_2y": "TIPS 2Y",
+        "tips_treas_5y": "TIPS 5Y",  "tips_treas_10y": "TIPS 10Y",
+        "cip_aud": "CIP AUD",  "cip_cad": "CIP CAD", "cip_chf": "CIP CHF",
+        "cip_eur": "CIP EUR",  "cip_gbp": "CIP GBP", "cip_jpy": "CIP JPY",
+        "cip_nzd": "CIP NZD",  "cip_sek": "CIP SEK",
         "eq_indu": "Equity INDU", "eq_ndx": "Equity NDX", "eq_spx": "Equity SPX",
     }
+    GROUP_INFO = [
+        ("ust_spot_fut", "Treasury: UST SF",    COLORS["ust"]),
+        ("tips_treas",   "Treasury: TIPS",       COLORS["tips"]),
+        ("cip",          "Non-Treasury: CIP",    COLORS["cip"]),
+        ("eq_spot_fut",  "Non-Treasury: Equity", COLORS["equity"]),
+    ]
 
-    fig, ax = plt.subplots(figsize=(6.5, 6.0))
-
-    group_colors = {
-        "ust_spot_fut": COLORS["ust"],
-        "tips_treas":   COLORS["tips"],
-        "cip":          COLORS["cip"],
-        "eq_spot_fut":  COLORS["equity"],
-    }
-
-    y_positions = list(range(len(ordered)))
-    group_positions = {}
-
-    for i, (_, row) in enumerate(ordered.iterrows()):
-        coef = row["coef_post"]
-        se   = row["se_post"]
-        t    = row["t_post"]
-        ci_lo = coef - 1.96 * se
-        ci_hi = coef + 1.96 * se
-        stars = sig_stars(t)
-
+    # Build rows with header entries
+    rows_h = []
+    prev = None
+    for _, row in ordered.iterrows():
         strat = row["strategy"]
-        color = group_colors.get(strat, "gray")
+        if strat != prev:
+            gn = next(g for s, g, c in GROUP_INFO if s == strat)
+            gc = next(c for s, g, c in GROUP_INFO if s == strat)
+            rows_h.append({"sid": None, "strat": strat, "coef": None, "se": None,
+                           "t": None, "label": gn, "color": gc, "is_hdr": True})
+            prev = strat
+        gc = next(c for s, g, c in GROUP_INFO if s == strat)
+        rows_h.append({"sid": row["series_id"], "strat": strat,
+                       "coef": row["coef_post"], "se": row["se_post"],
+                       "t": row["t_post"],
+                       "label": LABEL.get(row["series_id"], row["series_id"]),
+                       "color": gc, "is_hdr": False})
 
-        # Marker style
-        if strat == "ust_spot_fut":
-            fs = 'full'
-        elif strat == "tips_treas":
-            fs = 'none'
-        elif strat == "cip":
-            fs = 'full' if abs(t) > 1.645 else 'none'
-        else:
-            fs = 'none'
+    yp = list(range(len(rows_h)))
 
-        ax.errorbar(coef, i,
-                    xerr=[[coef - ci_lo], [ci_hi - coef]],
-                    fmt='o', color=color, fillstyle=fs,
-                    ms=5, capsize=2, elinewidth=0.8, lw=0.8)
+    fig, ax = plt.subplots(figsize=(6.8, 7.2))
 
+    for i, (r, y) in enumerate(zip(rows_h, yp)):
+        if r["is_hdr"]:
+            if i > 0:
+                ax.axhline(y - 0.5, color='#cccccc', lw=0.8, zorder=0)
+            continue
+        coef, se, t = r["coef"], r["se"], r["t"]
+        ci_lo, ci_hi = coef - 1.96 * se, coef + 1.96 * se
+        stars = sig_stars(t)
+        fs = 'full' if abs(t) > 1.645 else 'none'
+
+        ax.errorbar(coef, y, xerr=[[coef - ci_lo], [ci_hi - coef]],
+                    fmt='o', color=r["color"], fillstyle=fs,
+                    ms=6, capsize=3, elinewidth=1.1, lw=1.1)
         if stars:
-            ax.text(ci_hi + 0.5, i, stars, va='center', fontsize=7, color=color)
+            ax.text(ci_hi + 0.5, y, stars, va='center', fontsize=8.5, color=r["color"])
 
-        grp_name = {"ust_spot_fut": "Treasury: UST SF",
-                    "tips_treas":   "Treasury: TIPS",
-                    "cip":          "Non-Treasury: CIP",
-                    "eq_spot_fut":  "Non-Treasury: Equity"}[strat]
-        if grp_name not in group_positions:
-            group_positions[grp_name] = []
-        group_positions[grp_name].append(i)
+    ax.set_yticks(yp)
+    tick_lbls = ax.set_yticklabels([r["label"] for r in rows_h], fontsize=9)
+    for lbl, r in zip(tick_lbls, rows_h):
+        if r["is_hdr"]:
+            lbl.set_fontweight("bold"); lbl.set_fontstyle("italic")
+            lbl.set_fontsize(10);      lbl.set_color("#222222")
 
-    # Group labels
-    for grp_name, positions in group_positions.items():
-        mid = np.mean(positions)
-        ax.text(-0.01, mid, grp_name,
-                transform=ax.get_yaxis_transform(),
-                ha='right', va='center', fontsize=7,
-                fontstyle='italic', rotation=90)
-
-    ax.set_yticks(y_positions)
-    ax.set_yticklabels(
-        [label_map.get(row["series_id"], row["series_id"])
-         for _, row in ordered.iterrows()],
-        fontsize=7.5
-    )
     ax.invert_yaxis()
-    ax.axvline(0, color='gray', ls='--', lw=0.8)
-    ax.set_xlabel("Post-Expiry Coefficient (bps, exit event W=60)", fontsize=8)
-    ax.set_title("Series-Level Post Coefficients: Exit W=60 DIRECT", fontsize=9)
+    ax.axvline(0, color='#555555', ls='--', lw=0.9)
+    ax.set_xlabel("Post-expiry coefficient (bps, exit event W=60)",
+                  fontsize=12, fontweight="bold")
+    ax.set_title("Series-Level Post Coefficients: Exit W=60, Direct",
+                 fontsize=13, fontweight="bold", pad=7)
 
-    fig.tight_layout(pad=1.0)
+    fig.tight_layout(pad=1.3)
     save_fig(fig, "fig5_series_level_coefs")
     plt.close(fig)
 
 
-# ── Figure 6 — Regime Box Plots ───────────────────────────────────────────────
+# ── Figure 6 — Regime Box Plots ──────────────────────────────────────────────
 
 def fig6_regime_boxplots(panel):
     print("Generating Figure 6...")
 
-    fig, axes = plt.subplots(2, 2, figsize=(9.0, 6.5))
-    axes_flat = axes.flatten()
+    # tidyquant-inspired regime palette
+    REG_FACE = {"pre": "#dce6f1", "relief": "#fce4d6", "post": "#e2efda"}
+    REG_EDGE = {"pre": "#2c3e50", "relief": "#e31a1c", "post": "#18bc9c"}
+    REG_MED  = {"pre": "#2c3e50", "relief": "#e31a1c", "post": "#18bc9c"}
+    regimes  = ["pre", "relief", "post"]
 
-    REGIME_COLORS = {
-        "pre":    "#d0d0d0",
-        "relief": "#d4e6f1",
-        "post":   "#d5f5e3",
-    }
-    REGIME_DARK = {
-        "pre":    "#808080",
-        "relief": "#2980b9",
-        "post":   "#27ae60",
-    }
-    regimes = ["pre", "relief", "post"]
-    regime_labels = {"pre": "Pre", "relief": "Relief", "post": "Post"}
-
-    # Define sub-series for each strategy
     strategy_specs = [
-        {
-            "strategy": "ust_spot_fut",
-            "title": "UST Spot-Futures",
-            "subseries": [
-                ("ust_sf_2y",  "2Y"),
-                ("ust_sf_5y",  "5Y"),
-                ("ust_sf_10y", "10Y"),
-            ],
-            "color_key": "ust",
-        },
-        {
-            "strategy": "tips",
-            "title": "TIPS-Treasury",
-            "subseries": [
-                ("tips_treas_2y",  "TIPS 2Y"),
-                ("tips_treas_5y",  "TIPS 5Y"),
-                ("tips_treas_10y", "TIPS 10Y"),
-            ],
-            "color_key": "tips",
-        },
-        {
-            "strategy": "cip",
-            "title": "CIP (3m FX)",
-            "subseries": [
-                ("cip_eur", "EUR"),
-                ("cip_jpy", "JPY"),
-                ("cip_gbp", "GBP"),
-                # 'Other' = mean of AUD, CAD, NZD, SEK
-                (["cip_aud", "cip_cad", "cip_nzd", "cip_sek"], "Other"),
-            ],
-            "color_key": "cip",
-        },
-        {
-            "strategy": "eq_spot_fut",
-            "title": "Equity Spot-Futures",
-            "subseries": [
-                ("eq_spx",  "SPX"),
-                ("eq_ndx",  "NDX"),
-                ("eq_indu", "INDU"),
-            ],
-            "color_key": "equity",
-        },
+        {"title": "UST Spot-Futures", "subseries": [
+            ("ust_sf_2y", "2Y"), ("ust_sf_5y", "5Y"), ("ust_sf_10y", "10Y")]},
+        {"title": "TIPS-Treasury",    "subseries": [
+            ("tips_treas_2y", "TIPS 2Y"), ("tips_treas_5y", "TIPS 5Y"),
+            ("tips_treas_10y", "TIPS 10Y")]},
+        {"title": "CIP (3-month)",    "subseries": [
+            ("cip_eur", "EUR"), ("cip_jpy", "JPY"), ("cip_gbp", "GBP"),
+            (["cip_aud", "cip_cad", "cip_nzd", "cip_sek"], "Other")]},
+        {"title": "Equity Spot-Futures", "subseries": [
+            ("eq_spx", "SPX"), ("eq_ndx", "NDX"), ("eq_indu", "INDU")]},
     ]
+
+    fig, axes = plt.subplots(2, 2, figsize=(8.5, 6.0))
+    axes_flat = axes.flatten()
 
     for ax_idx, spec in enumerate(strategy_specs):
         ax = axes_flat[ax_idx]
         subseries = spec["subseries"]
-        n_sub = len(subseries)
-        n_reg = len(regimes)
+        n_reg     = len(regimes)
+        gw        = n_reg + 0.8
 
-        group_width = n_reg + 0.6
-        positions = []
-        tick_positions = []
-        tick_labels_sub = []
-        data_list = []
+        positions, tick_pos, tick_lbl = [], [], []
+        data_list, face_colors, edge_colors, med_colors = [], [], [], []
 
-        box_colors = []
-        dark_colors = []
-
-        for sub_i, (sid, slabel) in enumerate(subseries):
-            group_start = sub_i * group_width
-            group_center = group_start + (n_reg - 1) / 2.0
-
-            tick_positions.append(group_center)
-            tick_labels_sub.append(slabel)
-
-            for reg_i, reg in enumerate(regimes):
-                pos = group_start + reg_i
-                positions.append(pos)
-
+        for si, (sid, slabel) in enumerate(subseries):
+            gc = si * gw
+            tick_pos.append(gc + (n_reg - 1) / 2.0)
+            tick_lbl.append(slabel)
+            for ri, reg in enumerate(regimes):
+                positions.append(gc + ri)
                 if isinstance(sid, list):
-                    # 'Other' group: average across series
-                    vals = panel[
-                        (panel["series_id"].isin(sid)) &
-                        (panel["regime"] == reg)
-                    ].groupby("date")["y_abs_bps"].mean()
+                    vals = (panel[panel["series_id"].isin(sid) & (panel["regime"] == reg)]
+                            .groupby("date")["y_abs_bps"].mean())
                 else:
-                    vals = panel[
-                        (panel["series_id"] == sid) &
-                        (panel["regime"] == reg)
-                    ]["y_abs_bps"]
-
+                    vals = panel[(panel["series_id"] == sid) &
+                                 (panel["regime"] == reg)]["y_abs_bps"]
                 data_list.append(vals.dropna().values)
-                box_colors.append(REGIME_COLORS[reg])
-                dark_colors.append(REGIME_DARK[reg])
+                face_colors.append(REG_FACE[reg])
+                edge_colors.append(REG_EDGE[reg])
+                med_colors.append(REG_MED[reg])
 
-        # Draw boxplots
-        bp = ax.boxplot(data_list, positions=positions, widths=0.65,
+        bp = ax.boxplot(data_list, positions=positions, widths=0.64,
                         patch_artist=True, whis=[5, 95],
-                        medianprops=dict(color="black", lw=0.8),
-                        whiskerprops=dict(lw=0.6),
-                        capprops=dict(lw=0.6),
+                        medianprops=dict(color="black", lw=1.2),
+                        whiskerprops=dict(lw=0.7),
+                        capprops=dict(lw=0.7),
                         flierprops=dict(marker='.', ms=2, alpha=0.3, lw=0))
 
-        for patch, fc in zip(bp['boxes'], box_colors):
+        for patch, fc, ec in zip(bp['boxes'], face_colors, edge_colors):
             patch.set_facecolor(fc)
-            patch.set_linewidth(0.6)
+            patch.set_edgecolor(ec)
+            patch.set_linewidth(0.9)
 
-        # Overlay mean diamonds
-        for di, (pos, dc, vals) in enumerate(zip(positions, dark_colors, data_list)):
+        for pos, mc, vals in zip(positions, med_colors, data_list):
             if len(vals) > 0:
-                m = np.mean(vals)
-                ax.plot(pos, m, 'd', color=dc, ms=4, zorder=5, lw=0)
+                ax.plot(pos, np.mean(vals), 'd', color=mc, ms=5, zorder=5)
 
-        ax.set_xticks(tick_positions)
-        ax.set_xticklabels(tick_labels_sub, fontsize=7.5)
-        ax.set_ylabel("Spread |W| (bps)", fontsize=8)
-        ax.set_title(spec["title"], fontsize=9)
+        ax.set_xticks(tick_pos)
+        ax.set_xticklabels(tick_lbl, fontsize=10, fontweight="bold")
+        ax.set_ylabel("|W| (bps)", fontsize=11, fontweight="bold")
+        ax.set_title(spec["title"], fontsize=12, fontweight="bold", pad=5)
 
-        # Add regime legend to first panel only
         if ax_idx == 0:
-            from matplotlib.patches import Patch
-            legend_elements = [
-                Patch(facecolor=REGIME_COLORS["pre"],    edgecolor='gray', lw=0.5, label="Pre"),
-                Patch(facecolor=REGIME_COLORS["relief"], edgecolor='gray', lw=0.5, label="Relief"),
-                Patch(facecolor=REGIME_COLORS["post"],   edgecolor='gray', lw=0.5, label="Post"),
+            legend_els = [
+                Patch(facecolor=REG_FACE["pre"],    edgecolor=REG_EDGE["pre"],    lw=0.9, label="Pre"),
+                Patch(facecolor=REG_FACE["relief"], edgecolor=REG_EDGE["relief"], lw=0.9, label="Relief"),
+                Patch(facecolor=REG_FACE["post"],   edgecolor=REG_EDGE["post"],   lw=0.9, label="Post"),
             ]
-            ax.legend(handles=legend_elements, fontsize=7, loc="upper right")
+            ax.legend(handles=legend_els, fontsize=9, loc="upper right",
+                      borderpad=0.5, labelspacing=0.3)
 
-    fig.tight_layout(pad=1.2)
+    fig.tight_layout(pad=1.4)
     save_fig(fig, "fig6_regime_boxplots")
     plt.close(fig)
 
 
-# ── FIGURE MANIFEST and LaTeX ──────────────────────────────────────────────────
+# ── Manifest ──────────────────────────────────────────────────────────────────
 
-def write_manifest(did_fallback_used):
-    manifest_lines = ["# Figure Manifest\n"]
-
+def write_manifest():
     figures = [
-        {
-            "stem": "fig1_series_overview",
-            "title": "Figure 1 — Time Series Overview",
-            "label": "fig:series_overview",
-            "data": ["data/series/cip_spreads_3m_bps.csv",
-                     "data/series/treasury_sf_output.csv",
-                     "data/series/tips_treasury_implied_rf_2010.parquet",
-                     "data/series/equity_spot_spread_SPX.csv",
-                     "data/series/equity_spot_spread_NDX.csv",
-                     "data/series/equity_spot_spread_INDU.csv"],
-            "fallback": None,
-        },
-        {
-            "stem": "fig2_ust_sf_detail",
-            "title": "Figure 2 — UST SF Detail by Tenor",
-            "label": "fig:ust_sf_detail",
-            "data": ["data/series/treasury_sf_output.csv"],
-            "fallback": None,
-        },
-        {
-            "stem": "fig3_exit_event_paths",
-            "title": "Figure 3 — Exit Event Window Paths",
-            "label": "fig:exit_event_paths",
-            "data": ["Panel data from all series"],
-            "fallback": None,
-        },
-        {
-            "stem": "fig4_coef_plot",
-            "title": "Figure 4 — Coefficient Plot (Forest Plot)",
-            "label": "fig:coef_plot",
-            "data": ["audit_repairs/outputs/jump_estimates_pooled.csv",
-                     "audit_repairs/outputs/did_clean_baseline.csv"],
-            "fallback": (
-                "HARDCODED_FALLBACK used for DiD rows: "
-                "Relief×Treas TOTAL coef=-10.76 se=1.15; "
-                "Relief×Treas DIRECT coef=-10.77 se=1.14; "
-                "PostRelief×Treas TOTAL coef=-9.03 se=1.16; "
-                "PostRelief×Treas DIRECT coef=-9.04 se=1.16"
-            ) if did_fallback_used else None,
-        },
-        {
-            "stem": "fig5_series_level_coefs",
-            "title": "Figure 5 — Series-Level Coefficients (Exit W=60 DIRECT)",
-            "label": "fig:series_level_coefs",
-            "data": ["audit_repairs/outputs/jump_estimates_by_series.csv"],
-            "fallback": None,
-        },
-        {
-            "stem": "fig6_regime_boxplots",
-            "title": "Figure 6 — Regime Box Plots",
-            "label": "fig:regime_boxplots",
-            "data": ["Panel data from all series"],
-            "fallback": None,
-        },
+        ("fig1_series_overview",   "fig:series_overview"),
+        ("fig2_ust_sf_detail",     "fig:ust_sf_detail"),
+        ("fig3_exit_event_paths",  "fig:exit_event_paths"),
+        ("fig4_coef_plot",         "fig:coef_plot"),
+        ("fig5_series_level_coefs","fig:series_level_coefs"),
+        ("fig6_regime_boxplots",   "fig:regime_boxplots"),
     ]
-
-    for f in figures:
-        manifest_lines.append(f"## {f['title']}\n")
-        manifest_lines.append(f"**Files:** `{f['stem']}.pdf`, `{f['stem']}.png`\n\n")
-        manifest_lines.append(f"**Data sources:**\n")
-        for d in f["data"]:
-            manifest_lines.append(f"- {d}\n")
-        manifest_lines.append("\n")
-        if f["fallback"]:
-            manifest_lines.append(f"**FLAG — HARDCODED_FALLBACK:** {f['fallback']}\n\n")
-        manifest_lines.append(
-            "**LaTeX:**\n"
-            "```latex\n"
-            "\\begin{figure}[htbp]\n"
-            "  \\centering\n"
-            f"  \\includegraphics[width=0.95\\textwidth]{{figures_output/{f['stem']}.pdf}}\n"
-            "  \\caption{...}\n"
-            f"  \\label{{{f['label']}}}\n"
-            "\\end{figure}\n"
-            "```\n\n"
-        )
-
-    (OUT_DIR / "FIGURE_MANIFEST.md").write_text("".join(manifest_lines))
+    lines = ["# Figure Manifest (tidyquant/theme_bw style)\n\n"]
+    for stem, label in figures:
+        lines.append(f"## {stem}\n- PDF: `{stem}.pdf`\n- PNG: `{stem}.png`\n"
+                     f"- Label: `{label}`\n\n")
+    (OUT_DIR / "FIGURE_MANIFEST.md").write_text("".join(lines))
     print("  FIGURE_MANIFEST.md saved.")
-
-    # figures.tex
-    tex_lines = [
-        "% figures.tex — auto-generated by make_figures.py\n",
-        "% \\input{figures_output/figures.tex} in your main .tex file\n\n",
-    ]
-    caption_texts = {
-        "fig1_series_overview": (
-            "Time-series evolution of arbitrage spreads, 2019--2021. "
-            "Each panel shows the cross-series mean (solid line) and $\\pm$1 standard deviation band (shaded) "
-            "of absolute spread $|W|$ in basis points, smoothed with a 5-day rolling average. "
-            "The gray shaded region denotes the SLR exclusion relief period (April 1, 2020 -- March 31, 2021). "
-            "Dashed vertical lines mark the entry (red) and exit (green) dates."
-        ),
-        "fig2_ust_sf_detail": (
-            "UST spot-futures arbitrage spread by tenor, 2019--2021. "
-            "Lines show the absolute spread $|W|$ for 2-year (solid), 5-year (dashed), "
-            "and 10-year (dotted) maturities, smoothed with a 5-day rolling average. "
-            "Horizontal dotted lines indicate the pre-period mean (January 2019 -- January 2020). "
-        ),
-        "fig3_exit_event_paths": (
-            "Event-time paths around the SLR exclusion exit (March 31, 2021). "
-            "Left panel: Treasury-based strategies (UST spot-futures and TIPS-Treasury). "
-            "Right panel: non-Treasury control strategies (CIP and Equity spot-futures). "
-            "Series are demeaned by their pre-event mean (trading days $-60$ to $-1$) before averaging. "
-            "Shaded bands denote $\\pm$1 standard error. Dashed vertical line at day 0 marks the exit date."
-        ),
-        "fig4_coef_plot": (
-            "Pooled difference-in-differences estimates of the Post$\\times$Treasury coefficient. "
-            "Each row reports a point estimate with 95\\% confidence interval. "
-            "Exit and Entry event estimates use windows $W\\in\\{20,60\\}$ trading days; "
-            "Full-sample DiD estimates span 2019--2021. "
-            "Filled markers indicate $|t|>1.645$; stars denote $|t|>1.96$ (**) and $|t|>2.576$ (***)."
-        ),
-        "fig5_series_level_coefs": (
-            "Series-level post-expiry coefficients for the exit event (March 31, 2021), "
-            "window $W=60$, DIRECT specification. "
-            "Each row is an individual series; error bars show 95\\% confidence intervals. "
-            "Filled markers indicate $|t|>1.645$."
-        ),
-        "fig6_regime_boxplots": (
-            "Distribution of absolute arbitrage spreads $|W|$ by regime and strategy. "
-            "Box spans the interquartile range; whiskers extend to the 5th and 95th percentiles; "
-            "diamonds mark the within-group mean. "
-            "Pre = January 2019 -- March 31, 2020; Relief = April 1, 2020 -- March 31, 2021; "
-            "Post = April 1 -- December 31, 2021."
-        ),
-    }
-
-    for f in figures:
-        stem  = f["stem"]
-        label = f["label"]
-        cap   = caption_texts.get(stem, "...")
-        tex_lines.append(
-            f"\\begin{{figure}}[htbp]\n"
-            f"  \\centering\n"
-            f"  \\includegraphics[width=0.95\\textwidth]{{figures_output/{stem}.pdf}}\n"
-            f"  \\caption{{{cap}}}\n"
-            f"  \\label{{{label}}}\n"
-            f"\\end{{figure}}\n\n"
-        )
-
-    (OUT_DIR / "figures.tex").write_text("".join(tex_lines))
-    print("  figures.tex saved.")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    print("=== SLR Exclusion Paper — Figure Generation ===\n")
+    print("=== SLR Paper \u2014 Figure Generation (tidyquant / theme_bw style) ===\n")
 
     print("Loading panel data...")
     panel = load_panel()
-    print(f"  Panel shape: {panel.shape}")
-    print(f"  Strategies: {panel['strategy'].unique().tolist()}")
-    print(f"  Date range: {panel['date'].min()} to {panel['date'].max()}")
-    print()
+    print(f"  Panel: {panel.shape}, "
+          f"strategies: {panel['strategy'].unique().tolist()}, "
+          f"dates: {panel['date'].min().date()} \u2013 {panel['date'].max().date()}\n")
 
     fig1_series_overview(panel)
     fig2_ust_sf_detail(panel)
@@ -989,27 +736,19 @@ def main():
     fig4_coef_plot()
     fig5_series_level_coefs()
     fig6_regime_boxplots(panel)
+    write_manifest()
 
-    # Check if DiD fallback was used
-    did_path = REPO_ROOT / "audit_repairs/outputs/did_clean_baseline.csv"
-    did_fallback = not did_path.exists()
-    write_manifest(did_fallback)
+    print("\n=== All figures complete ===")
+    print(f"Saved to: {OUT_DIR}\n")
 
-    print("\n=== All figures complete. ===")
-    print("Files saved to:", OUT_DIR)
-
-    # Verify file sizes
-    print("\nFile size check:")
+    print("File sizes:")
     for stem in ["fig1_series_overview", "fig2_ust_sf_detail", "fig3_exit_event_paths",
                  "fig4_coef_plot", "fig5_series_level_coefs", "fig6_regime_boxplots"]:
         for ext in ("pdf", "png"):
             p = OUT_DIR / f"{stem}.{ext}"
-            if p.exists():
-                size_kb = p.stat().st_size / 1024
-                ok = "OK" if size_kb > 50 else "WARNING: small file"
-                print(f"  {stem}.{ext}: {size_kb:.0f} KB  [{ok}]")
-            else:
-                print(f"  {stem}.{ext}: MISSING")
+            kb = p.stat().st_size / 1024 if p.exists() else 0
+            flag = "OK" if kb > 30 else "MISSING" if kb == 0 else "small"
+            print(f"  {stem}.{ext:3s}: {kb:5.0f} KB  [{flag}]")
 
 
 if __name__ == "__main__":
