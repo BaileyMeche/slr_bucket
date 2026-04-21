@@ -34,14 +34,14 @@
 \begin{document}
 
 \resetSectionPageNumber{Project Summary}
-\section{Balance sheet Capacity and Cross-Strategy Treasury Arbitrage: SLR Exclusion Event Study
+\section{Balance Sheet Capacity and Cross-Strategy Treasury Arbitrage: SLR Exclusion Event Study
 }
 
 \subsubsection{Author}
 Bailey Meche, Department of Economics, Masters in Computational Social Science - Economics, \href{mailto:baileymeche@uchicago.edu}{baileymeche@uchicago.edu}
 
 \subsection{Abstract}
-Regulatory leverage constraints are often described as shaping financial intermediaries’ willingness
+Regulatory leverage constraints are often described as shaping financial intermediaries' willingness
 and ability to intermediate U.S. Treasury markets, especially during stress episodes. The empirical
 focus of this study is the Federal Reserve's
 temporary exclusion of U.S.\ Treasury securities and Federal Reserve deposits
@@ -50,38 +50,66 @@ from the Supplementary Leverage Ratio (SLR) denominator,  effective April~1,
 in balance sheet capacity for covered bank holding companies. Using a pooled
 difference-in-differences design across 17 daily arbitrage spread series in
 four strategy classes (Treasury spot-futures, TIPS-Treasury, covered interest
-parity, and equity spot-futures), I test whether the SLR relief differentially
-compressed Treasury-based arbitrage spreads relative to non-Treasury controls. The foundation for this approach is
-\citet{siriwardane2025segmented} who show that balance sheet constraints limit
-intermediaries' ability to arbitrage these spreads away, and {different}
-balance sheets constrain {different} trades, which is why an SLR
-exclusion targeting covered banks' Treasury and reserve holdings should compress Treasury-based spreads while leaving non-Treasury
-spreads unchanged.
+parity, and equity spot-futures), this study tests whether the SLR relief differentially
+compressed Treasury-based arbitrage spreads relative to non-Treasury controls. 
+The foundation for this approach is \citet{siriwardane2025segmented}, who show that balance-sheet constraints limit intermediaries' ability to arbitrage these spreads away, and that arbitrage is segmented: distinct intermediary types are the marginal arbitrageurs in distinct strategies, and each faces its own binding regulatory constraint. This is why we expect an SLR exclusion targeting covered banks' Treasury and reserve holdings to compress Treasury-based spreads while leaving non-Treasury spreads relatively unchanged.
 
-The expiry of the exclusion is the cleanest identification of price impact on arbitrage spread series. When the relief expired, Treasury-based spreads widened by $3.84$ basis points more
+The expiry of the exclusion provides the sharpest evidence of price impact on arbitrage spread series. When the relief expired, Treasury-based spreads widened by $3.84$ basis points more
 than non-Treasury spreads in the subsequent 60 trading days following SLR announcement.
-%(HAC $t = 4.32$, $p < 0.01$), a result that is stable to the
-% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post×TreasuryBased row: coef=+3.84, SE=0.89, t=4.32 [audit_repairs/outputs/jump_estimates_pooled.csv]
-% one-hundredth of a basis point whether or not secured overnight funding controls are added. 
 A full-period difference-in-differences using the
 2019 pre-COVID baseline estimates that Treasury spreads compressed by
 $10.76$ basis points more than non-Treasury spreads during the relief window. 
-%  ($t = -9.37$) SOURCE: tab:did_clean Panel A, TOTAL, mu2 row: coef=-10.76, SE=1.15, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv]
 Non-Treasury series 
-% (CIP deviations and equity spot-futures) 
 show no comparable break
 at the SLR event dates, consistent with balance sheet segmentation rather
 than a general intermediary-health shock. These results provide direct
 policy-event evidence for the balance sheet channel in Treasury arbitrage
 markets.  The estimates complement \citet{braeuning2024effect},
-who find that primary dealer constraints impose a shadow cost equal to 26–33\% of dealers' intermediation margin.%
+who find that primary dealer constraints impose a shadow cost equal to 26--33\% of dealers' intermediation margin.%
 \footnote{Replication code, data pipeline, and all outputs are available at
 \url{https://github.com/BaileyMeche/slr\_bucket}.}
 
+
 \subsection{Background }
 \label{sec:background}
-The arbitrage spreads studied in this paper, defined as "riskless returns in excess of riskless rate" \citep{siriwardane2025segmented}, are not
-textbook anomalies to be competed away in equilibrium, but 
+
+% \paragraph{Institutional setting: the SLR and its 2020--2021 exclusion.}
+The Supplementary Leverage Ratio is a non-risk-weighted capital
+requirement on large U.S.\ bank holding companies, requiring
+Tier~1 capital to exceed a minimum fraction of total leverage
+exposure. Because the denominator is unweighted, U.S.\ Treasuries and
+deposits at the Federal Reserve consume the same balance sheet
+capacity as corporate loans or risky securities: for an intermediary
+whose SLR binds, an additional dollar of Treasuries displaces a
+dollar of alternative balance sheet use. Under frictionless
+intermediation the arbitrage spreads studied here would be zero; in
+the segmented-arbitrage framework of \citet{siriwardane2025segmented},
+their magnitudes price the segment-specific balance sheet capacity
+required to intermediate the trade, since arbitrageurs must
+simultaneously hold the cheap leg and short the expensive leg, and
+that inventory consumes leverage.
+ 
+The Federal Reserve's 2020--2021 SLR exclusion removed this leverage
+cost specifically for Treasury and reserve holdings at covered bank
+holding companies, effective April~1, 2020 and expiring March~31,
+2021, while leaving the capacity cost for foreign-currency, equity,
+and other positions unchanged. This regulatory asymmetry generates
+the paper's treatment-control structure directly from the
+segmentation framework: the Treasury spot-futures and TIPS--Treasury
+series are within the regulation's scope and intermediated by
+segments whose balance sheet cost fell (treatment), while the CIP
+and equity spot-futures series are outside the regulation's scope and
+intermediated by segments whose balance sheet cost did not
+(control). The SLR window therefore delivers a cross-strategy
+experiment in which the treated spreads' balance sheet cost was
+reduced but the controls' was not, yielding a testable differential
+prediction without requiring the broader balance sheet environment
+to be held constant.
+
+\subsection{Literature Review}
+\label{sec:lit}
+
+The arbitrage spreads studied in this paper, defined as "riskless returns in excess of riskless rate" \citep{siriwardane2025segmented}, are
 persistent, economically large, and have been the subject of a significant research agenda in financial economics. This section
 traces that literature chronologically to motivate two claims: first,
 that the SLR exclusion should differentially compress Treasury-based
@@ -163,12 +191,16 @@ only 22\% across spreads, only 5\% across spread
 the representative-intermediary type: under a single intermediary
 stochastic discount factor, all arbitrages should load on a common
 factor, and the data reject this. The authors' interpretation is
-that arbitrage is {segmented} along two dimensions: balance-sheet segmentation and funding segmentation. The former refers to different intermediary types specialize in different trades who are indeed segmented because different intermediary
-types specialize in different
-trades. The latter refers to different trades depend on different funding sources: repo for secured Treasury-based trades, unsecured dealer funding for CIP and equity-based trades.
-Funding is segmented because different trades depend on
-different funding sources: repo for secured Treasury-based trades,
-unsecured dealer funding for CIP and equity-based trades. Rather
+that arbitrage is {segmented} along two dimensions: balance-sheet
+segmentation and funding segmentation. Balance-sheet segmentation
+means that different regulatory and internal-risk constraints bind on
+the balance sheets that intermediate different trades: primary dealers,
+fixed-income hedge funds, and equity-derivatives desks each face a
+distinct binding constraint, so a shock to any one of them propagates
+only to the trades that type intermediates. Funding segmentation means
+that different trades depend on different funding sources: repo for
+secured Treasury-based trades, unsecured dealer funding for CIP and
+equity-based trades. Rather
 than a single intermediary kernel, arbitrage spreads are priced by a
 constellation of segment-specific shadow costs of capital. Different
 hedge funds matter for different Treasury basis trades; broker-dealer
@@ -187,43 +219,10 @@ a spread response in unaffected segments is itself the identifying
 evidence. This paper applies the same cross-strategy identification
 logic to the 2020--2021 SLR exclusion.
  
-% \paragraph{Institutional setting: the SLR and its 2020--2021 exclusion.}
-The Supplementary Leverage Ratio is a non-risk-weighted capital
-requirement on large U.S.\ bank holding companies, requiring
-Tier~1 capital to exceed a minimum fraction of total leverage
-exposure. Because the denominator is unweighted, U.S.\ Treasuries and
-deposits at the Federal Reserve consume the same balance sheet
-capacity as corporate loans or risky securities: for an intermediary
-whose SLR binds, an additional dollar of Treasuries displaces a
-dollar of alternative balance sheet use. Under frictionless
-intermediation the arbitrage spreads studied here would be zero; in
-the segmented-arbitrage framework of \citet{siriwardane2025segmented},
-their magnitudes price the segment-specific balance sheet capacity
-required to intermediate the trade, since arbitrageurs must
-simultaneously hold the cheap leg and short the expensive leg, and
-that inventory consumes leverage.
- 
-The Federal Reserve's 2020--2021 SLR exclusion removed this leverage
-cost specifically for Treasury and reserve holdings at covered bank
-holding companies, effective April~1, 2020 and expiring March~31,
-2021, while leaving the capacity cost for foreign-currency, equity,
-and other positions unchanged. This regulatory asymmetry generates
-the paper's treatment-control structure directly from the
-segmentation framework: the Treasury spot-futures and TIPS--Treasury
-series are within the regulation's scope and intermediated by
-segments whose balance sheet cost fell (treatment), while the CIP
-and equity spot-futures series are outside the regulation's scope and
-intermediated by segments whose balance sheet cost did not
-(control). The SLR window therefore delivers a cross-strategy
-experiment in which the treated spreads' balance sheet cost was
-reduced but the controls' was not, yielding a testable differential
-prediction without requiring the broader balance sheet environment
-to be held constant.
 
 \subsection{Hypothesis}
 
 The SLR exclusion generates two testable predictions concerning differential Treasury price impact: spreads re-widen at SLR expiry, and spreads compress during the relief period relative to the pre-COVID baseline.
-%, ordered by their empirical tractability in the available sample.
 
 % \paragraph{Prediction 1 (Primary): Differential Treasury re-widening at expiry.}
 When the exclusion expired on March~31, 2021, covered banks faced restored
@@ -239,11 +238,11 @@ targeted Treasury and reserve holdings rather than cross-currency positions
 or equity derivatives. Equity spreads are mechanically linked to short-term
 Treasury yields (see footnote in Section~\ref{sec:data}), which introduces
 a potential conservative attenuation. On net, non-Treasury spreads should
-show no {comparable} break at the SLR event dates. This is the paper's primary identification because the
-60-trading-day pre-period for the exit event %(October~2020 through March~2021)
+show no {comparable} break at the SLR event dates. This is the paper's primary source of evidence because the
+60-trading-day pre-period for the exit event
 is free of the acute market dislocations that confound the entry window.
 Note, however, that this pre-period falls entirely within the SLR relief
-itself; the exit identification therefore rests on the cross-strategy
+itself; the exit evidence therefore rests on the cross-strategy
 comparison at the expiry date rather than a clean pre-treatment baseline.
 The 2019 pre-COVID clean DiD provides the untreated
 baseline evidence.
@@ -266,15 +265,14 @@ measuring the relief effect.
 \subsection{Data}\label{sec:data}
 The following daily panels of arbitrage spreads for 2019--2021 are employed, with 2019 serving as the pre-COVID baseline and 2020--2021 as the treatment and post-treatment windows. Figure~\ref{fig:series_overview} plots the time-series evolution of all four strategy classes across the full sample and Table \ref{tab:data_sources} summarizes all data sources.
 All series are measured in basis points. Controls (merged by date) include: secured funding rates and wedges (SOFR, TGCR--SOFR), broad risk indicators (VIX, HY OAS, Baa--10y), and Treasury issuance volumes by tenor.  
-% Mechanism proxies---specifically a bank exemption-eligible share (total reserves plus U.S.\ Treasuries as a share of assets, from FR~Y-9C call reports) and a dealer utilization index (from primary dealer repo/reverse-repo activity)---are outlined as the primary extension for future work but are not yet incorporated into the estimation pipeline. See Prediction~3 and Section~\ref{sec:robustness} for discussion.
 
-\paragraph{TIPS–Treasury Arbitrage.} As in \citet{fleckenstein2014tips} and \citet{siriwardane2025segmented}, the spread \(W_{t,\tau}=\bigl(y^{\text{TIPS}}_{t,\tau}+\pi^{\text{swap}}_{t,\tau}\bigr)-y^{\text{nom}}_{t,\tau}\) for \(\tau\in\{2,5,10\}\) years. Here \(y^{\text{TIPS}}_{t,\tau}+\pi^{\text{swap}}_{t,\tau}\) is the synthetic nominal yield.
-\paragraph{Treasury Spot–Futures Arbitrage.} For each of the 2-, 5-, and 10-year Treasuries, I use the first-deferred futures contract to compute a no-arbitrage implied yield (spot-futures parity) and subtract the matching OIS rate. I retain the 2-, 5-, and 10-year tenors, for which data coverage and
+\paragraph{TIPS--Treasury Arbitrage.} As in \citet{fleckenstein2014tips} and \citet{siriwardane2025segmented}, the spread \(W_{t,\tau}=\bigl(y^{\text{TIPS}}_{t,\tau}+\pi^{\text{swap}}_{t,\tau}\bigr)-y^{\text{nom}}_{t,\tau}\) for \(\tau\in\{2,5,10\}\) years. Here \(y^{\text{TIPS}}_{t,\tau}+\pi^{\text{swap}}_{t,\tau}\) is the synthetic nominal yield.
+\paragraph{Treasury Spot--Futures Arbitrage.} For each of the 2-, 5-, and 10-year Treasuries, I use the first-deferred futures contract to compute a no-arbitrage implied yield (spot-futures parity) and subtract the matching OIS rate. I retain the 2-, 5-, and 10-year tenors, for which data coverage and
 liquidity are most reliable across the 2019--2021 sample. The construction
 follows \citet{siriwardane2025segmented}, who apply the same methodology
 for the 2-, 5-, 10-, 20-, and 30-year tenors over 2010--2020.
 \paragraph{CIP Arbitrage.} Following \citet{du2018deviations}, for each of eight G-10 currencies (AUD, CAD, CHF, EUR, GBP, JPY, NZD, SEK) I define the 3-month CIP basis as the difference between the dollar OIS rate and the synthetic forward-implied rate from currency spot and forward quotes. I examine all eight individually and present pooled and series-level results; the mean across currencies is used for strategy-class summary statistics.
-\paragraph{Equity Spot–Futures Spread.} For three equity indexes (SPX, INDU, NDX) I calculate the rate implied by equity index futures (accounting for dividends) and subtract the short-term Treasury yield. This spread is based on the violation of stock spot–futures parity.% MOVE THIS 
+\paragraph{Equity Spot--Futures Spread.} For three equity indexes (SPX, INDU, NDX) I calculate the rate implied by equity index futures (accounting for dividends) and subtract the short-term Treasury yield. This spread is based on the violation of stock spot--futures parity.
 \footnote{The equity spot-futures spread mechanically depends on
 short-term Treasury yields through its construction. If the SLR
 exclusion affected Treasury yield levels, it could in principle compress
@@ -300,14 +298,13 @@ design cannot cleanly make.}
 \hline\hline
 Series & Construction & Source & $N$ obs \\[3pt]
 \hline
-\multicolumn{4}{l}{\textbf{\emph{Panel A: Treasury-based arbitrage spreads}}} \\[3pt] %\hline
+\multicolumn{4}{l}{\textbf{\emph{Panel A: Treasury-based arbitrage spreads}}} \\[3pt]
 TIPS--Treasury (2y, 5y, 10y) & $y^{\text{TIPS}}_{t,\tau}+\pi^{\text{swap}}_{t,\tau}-y^{\text{nom}}_{t,\tau}$ & Bloomberg / Fed H.15 & ${}3{,}750$/tenor \\
 UST spot-fut.\ (2y, 5y, 10y) & Futures-implied yield minus OIS & Bloomberg & ${}4{,}967$/tenor \\[4pt]
-\multicolumn{4}{l}{\textbf{\emph{{Panel B: Non-Treasury arbitrage spreads}}}} \\[3pt] %\hline
+\multicolumn{4}{l}{\textbf{\emph{{Panel B: Non-Treasury arbitrage spreads}}}} \\[3pt]
 CIP 3m (8 G-10 currencies) & Dollar OIS minus synthetic forward rate & Bloomberg & ${}3{,}910$/tenor \\
 Equity SF (SPX, NDX, INDU) & Futures-implied forward minus T-bill & Bloomberg & ${}3{,}730$/tenor \\[4pt]
 \multicolumn{4}{l}{\textbf{\emph{{Panel C: Controls}}}} \\[3pt] 
-%\hline
 VIX, HY OAS, Baa--10y & Daily index levels & CBOE / ICE BofA / FRED & 794 \\
 SOFR, TGCR--SOFR & Overnight secured rates & NY Fed STFM & 784 \\
 Treasury issuance & Rolling 7/14/30-day total & FiscalData Treasury & 794 \\
@@ -317,11 +314,9 @@ Treasury issuance & Rolling 7/14/30-day total & FiscalData Treasury & 794 \\
 \footnotesize
 \item \textit{Notes.} Estimation sample: January~1, 2019 to December~31,
 2021. 
-%``$N$ obs'' reports raw daily observations over the full Bloomberghistory available for each series (prior to any sample restriction ormerging to controls); for UST spot-futures this spans back to approximately 2001 (${\approx}4{,}967$ trading days).
 The final stacked
 estimation panel contains 68,620 series-day observations across 17 series
 (after merging to controls over 2019--2021).
-%All series winsorized within-series at the first and 99th percentiles.
 \end{tablenotes}
 \end{table}
 
@@ -337,10 +332,6 @@ estimation panel contains 68,620 series-day observations across 17 series
   \label{fig:series_overview}
 \end{figure}
 
-%==========================================================
-% SECTION IV: IDENTIFICATION STRATEGY AND EMPIRICAL RESULTS
-%==========================================================
-
 \subsection{Design}
 \label{sec:design}
 
@@ -348,8 +339,6 @@ The Federal Reserve's temporary exclusion of U.S.\ Treasury securities and
 Federal Reserve deposits from the Supplementary Leverage Ratio (SLR)
 denominator provides a time-dated regulatory change in the
 balance sheet capacity of covered bank holding companies. 
-% The exclusion
-% took effect on April 1, 2020, and expired on March 31, 2021. 
 I use this
 event to test whether regulatory leverage
 constraints are the operative friction behind Treasury-based arbitrage
@@ -440,7 +429,7 @@ a robustness check in Section~\ref{sec:robustness}.
 I estimate (\ref{eq:did}) separately for the entry event (April 1, 2020)
 and the exit event (March 31, 2021), and separately for symmetric windows
 of $\pm 20$ and $\pm 60$ trading days around each event date. As I
-discuss below, the exit event provides sharper identification because the
+discuss below, the exit event provides sharper evidence because the
 pre-period of the exit window---falling entirely within the post-COVID
 normalization period of late 2020---satisfies the parallel-trends
 assumption in a way the entry window cannot.
@@ -467,11 +456,9 @@ the model includes interactions of both with $\mathrm{TreasuryBased}_i$:
 Treasury-based spread response during and after the relief period,
 respectively, relative to the 2019 pre-period baseline.
 
-% \section{Identification Strategy and Empirical Results}
 \subsection{Results}
 \label{sec:results}
 
-% \paragraph{Pre-trend validation.}
 The difference-in-differences design requires that, absent the SLR event,
 Treasury-based and non-Treasury spreads would have followed parallel trends.
 I test this directly within the 2019 pre-treatment year by interacting
@@ -486,13 +473,8 @@ on the 2019 calendar year.
 Results are shown in Table~\ref{tab:pretrend_quarterly}.
  A joint Wald test of $H_0\colon \delta_2 = \delta_3 =
 \delta_4 = 0$ yields $F(3, 4{,}306) = 17.04$, $p < 0.001$, decisively
-% SOURCE: investigation_outputs/pretrend_quarterly_results.csv [quarterly pre-trend test on 2019 baseline, TOTAL controls]
 rejecting the null. The Treasury-based and non-Treasury spread groups had
 significantly different seasonal dynamics in 2019:
-% their differential was approximately flat in $Q_2$ but widened in $Q_3$ (Treasury spreads about
-% 6 bps higher relative to non-Treasury than in $Q_1$) and narrowed in $Q_4$
-% (about 6 bps lower), consistent with known seasonal patterns in UST
-% spot-futures and TIPS markets. 
 This is an important limitation of the
 parallel-trends assumption for the DiD design. The magnitude of the
 treatment effect ($\hat{\mu}_2 = -10.76$ bps) substantially exceeds these
@@ -526,7 +508,6 @@ versus non-Treasury spreads in quarter $q$ relative to $Q_1$, conditional
 on series fixed effects and \textsc{Total} controls (VIX, HY~OAS, Baa--10y).
 $N = 4{,}332$ series-day observations; HAC SE (Newey-West, 5 lags).
 ${}^{***}\,p<0.01$.
-% Source: \texttt{investigation\_outputs/pretrend\_quarterly\_results.csv}.
 \end{tablenotes}
 \end{table}
 
@@ -537,14 +518,10 @@ $\mathrm{Post}_t$ with event-time bin indicators to characterize the
 within-window spread dynamics around the exit date. The results in
 Table~\ref{tab:pretrend} show  significant negative pre-event interaction
 coefficients 
-%($F = 9.92$, $p < 0.001$) confirm that Treasury-based spreads
-% SOURCE: tab:pretrend, F-test row (6 pre-event leads): F=9.92, p<0.001 [investigation_outputs/pretrend_regression_results.csv]
 were actively compressing relative to their all-period mean throughout the
 pre-window: this is the treatment effect in progress, not a pre-trend
 divergence.
-% The post-event lag coefficients are mixed: bins $[{+}0, {+}9]$ through $[{+}20, {+}29]$ are small and insignificant (range: $-0.70$ to $+0.69$ bps), bin $[{+}30, {+}39]$ is significantly negative ($-2.77$ bps, $t = -3.12$), and the final bin $[{+}50, {+}60]$ is significantly positive ($+2.19$ bps, $t = 2.43$). 
 This non-monotone pattern for post-event lag coefficients is consistent with within-window mean-reversion dynamics at the series fixed-effect level and does not contradict the pooled level-shift estimate of $\hat{\beta} = +3.84$ bps, which directly compares the pre-expiry and post-expiry within-window means.
-% SOURCE: tab:pretrend all post-event bins: [+0,+9]=+0.56(t=+0.53), [+10,+19]=+0.69(t=+0.78), [+20,+29]=-0.70(t=-0.77), [+30,+39]=-2.77(t=-3.12), [+40,+49]=-1.17(t=-1.46), [+50,+60]=+2.19(t=+2.43) [investigation_outputs/pretrend_regression_results.csv]
 
 \begin{table}[h]
 \centering
@@ -583,7 +560,6 @@ in the regression simultaneously; coefficients are expressed relative to the
 series fixed-effect mean (the all-period average for each series).
 HAC standard errors (Newey-West, 5 lags).
 ${}^{***}\,p < 0.01$; ${}^{**}\,p < 0.05$.
-% \textit{Note on pre-event bins.} 
 The significant negative pre-event
 interaction coefficients ($F = 9.92$, $p < 0.001$) reflect the SLR relief
 actively compressing Treasury-based spreads during the 60-trading-day
@@ -593,17 +569,13 @@ because it is itself within the treatment period. The proper pre-trend
 test---quarterly interactions of $\mathrm{TreasuryBased}_i$ with calendar
 quarters in 2019---rejects parallel trends ($F(3,4306)=17.04$, $p<0.001$);
 see Section~\ref{sec:results} for discussion.
-% SOURCE: investigation_outputs/pretrend_quarterly_results.csv
 \end{tablenotes}
 \end{table}
-
-% \subsubsection{The Exit Event: Primary Identification}
-% \label{sec:exit}
 
 Table~\ref{tab:pooled_jump} reports estimates of (\ref{eq:did}) for the
 exit and entry event, across
 both window sizes and both control specifications. I begin with the exit
-event, which I regard as the paper's cleanest identification.
+event, which I regard as providing the paper's sharpest evidence.
 
 The exit specification uses a pre-event window that falls between October 2020
 and March 2021. This is a period of sustained post-COVID market
@@ -631,40 +603,32 @@ differential response at expiry.
 
 The estimated interaction coefficient at $W = 60$ under the \textsc{Total}
 specification is $\hat{\beta} = +3.84$ basis points 
-%(HAC SE $= 0.89$, $t = 4.32$), significant at the one-percent level. 
 The \textsc{Direct}
-% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post×TreasuryBased: coef=+3.84, SE=0.89, t=4.32; also tab:robustness row 8; also tab:dk_robustness Exit TOTAL Post×Treas [audit_repairs/outputs/jump_estimates_pooled.csv]
 specification, which adds SOFR and TGCR-SOFR controls, yields
-$\hat{\beta} = +3.84$ basis points.% (SE $= 0.88$, $t = 4.34$). 
+$\hat{\beta} = +3.84$ basis points.
 These
-% SOURCE: tab:pooled_jump Panel A, Exit W=60 DIRECT, Post×TreasuryBased: coef=+3.84, SE=0.88, t=4.34; also tab:robustness row 8; tab:dk_robustness Exit DIRECT t_NW=4.34 [audit_repairs/outputs/jump_estimates_pooled.csv]
 estimates are identical to two decimal places; the negligible difference
 between the \textsc{Total} and \textsc{Direct} specifications is
 informative: adding secured overnight funding rate controls does not
 move the Treasury differential at all, 
-%($\Delta\hat{\beta} < 0.01$basis points across all exit specifications), 
 confirming that the
 differential widening of Treasury spreads at expiry operates through a
 channel orthogonal to secured funding market conditions. This stability rules out one specific alternative---that post-expiry Treasury spread widening reflects a contemporaneous tightening of secured repo markets---and is consistent with the balance sheet constraint channel as the operative mechanism, though it does not rule out other coincident factors such as anticipatory portfolio rebalancing or shifts in hedge fund leverage.
 
 The results are equally stable at the narrower $W = 20$ window:
-$\hat{\beta} = +3.91$ basis points %(SE $= 0.92$, $t = 4.26$) 
+$\hat{\beta} = +3.91$ basis points 
 under
-% SOURCE: tab:pooled_jump Panel A, Exit W=20 TOTAL, Post×TreasuryBased: coef=+3.91, SE=0.92; tab:robustness Exit W=20 Post×Treas TOTAL: t=+4.26 [audit_repairs/outputs/jump_estimates_pooled.csv]
-\textsc{Total} and $+3.90$ basis points %(SE $= 0.92$, $t = 4.24$) 
+\textsc{Total} and $+3.90$ basis points 
 under
-% SOURCE: tab:pooled_jump Panel A, Exit W=20 DIRECT, Post×TreasuryBased: coef=+3.90, SE=0.92; tab:robustness Exit W=20 Post×Treas DIRECT: t=+4.24 [audit_repairs/outputs/jump_estimates_pooled.csv]
 \textsc{Direct}. The insensitivity to window choice further supports the
 conclusion that the Treasury differential reflects a discrete regime
 shift rather than noise.
 
 The non-Treasury baseline coefficient $\hat{\gamma}$ at $W = 60$
-is $-3.09$ basis points %(\textsc{Total}, $t = -3.72$) 
+is $-3.09$ basis points 
 and $-2.97$ basis
-% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post: coef=-3.09, SE=0.83, t=-3.72; tab:dk_robustness Exit TOTAL Post: t_NW=-3.72 [audit_repairs/outputs/jump_estimates_pooled.csv]
-points.% (\textsc{Direct}, $t = -3.48$).
+points.
 Non-Treasury spreads were
-% SOURCE: tab:pooled_jump Panel A, Exit W=60 DIRECT, Post: coef=-2.97, SE=0.85, t=-3.48; tab:dk_robustness Exit DIRECT Post: t_NW=-3.48 [audit_repairs/outputs/jump_estimates_pooled.csv]
 therefore continuing to compress slightly in the post-expiry window,
 reflecting the ongoing secular normalization of cross-currency bases
 documented by \citet{du2018deviations}. This compression makes
@@ -680,26 +644,14 @@ the relief window ($7.8$ bps), suggesting that the first 60 trading days
 after expiry reversed nearly half of the per-period compression for the
 most directly affected series.%
 \footnote{
-% This 49\% uses the UST spot-futures relief-window mean ($7.8$ bps)
-% as the denominator and the pooled exit $\hat{\beta} = +3.84$ bps as the numerator,
-% which is a numerator-denominator mismatch: the numerator is pooled across all
-% six Treasury-based series while the denominator is series-specific. Using the
-% full Treasury-based class average would give a different scaling. 
 The figure
 is best read as an order-of-magnitude benchmark for the UST spot-futures channel
 specifically, not as a precise reversal percentage for the pooled DiD.
-% A separate reversal estimate from the full-period DiD ($\hat{\mu}_2 - \hat{\mu}_4$)
-% yields a point estimate of $1.73/10.76 \approx 16$\% over a longer
-% nine-month window, though that estimate is not statistically significant
-% ($p = 0.11$). These two figures---49\% over 60 trading days (UST SF only,
-% event-window) and 16\% over nine months (pooled, full-period DiD)---
-% measure different horizons, different samples, and different baselines and should
-% not be compared directly.
 }
 This magnitude is in the same order of magnitude as the shadow cost
 estimated by \citet{braeuning2024effect} (26--33\% of Treasury
 bid-ask spreads) though direct comparison requires a bridging argument
-between bid-ask spreads %(typically 0.5--2~bps for on-the-run notes) 
+between bid-ask spreads 
 and
 arbitrage spreads (7--25~bps in this sample), which are fundamentally
 different objects.
@@ -779,21 +731,6 @@ vs.\ $-10.77$ bps). See Section~\ref{sec:did_clean} for discussion.
 
 Table~\ref{tab:did_clean} reports estimates of (\ref{eq:did_clean}) under
 both control specifications. 
-%Under \textsc{Total} controls, the relief
-% interaction is $\hat{\mu}_2 = -10.76$ basis points (SE $= 1.15$,
-% $t = -9.37$), significant at the one-percent level. The non-Treasury
-% SOURCE: tab:did_clean Panel A, TOTAL, mu2 row: coef=-10.76, SE=1.15, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv; csv value: coef=-10.763, se=1.1491, t=-9.366]
-% baseline change during the relief period is $\hat{\mu}_1 = -1.34$
-% basis points (SE $= 1.13$, $t = -1.19$), which is economically small
-% SOURCE: tab:did_clean Panel A, TOTAL, mu1 row: coef=-1.34, SE=1.13, t=-1.19 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-1.3403, se=1.1294, t=-1.187]
-% and statistically indistinguishable from zero. An insignificant $\hat{\mu}_1$
-% indicates that the pooled non-Treasury average level did not shift between
-% 2019 and the relief period, but it does not constitute a parallel-trends
-% test. As reported in Section~\ref{sec:results}, the proper pre-trend test
-% using quarterly within-2019 group interactions rejects the parallel-trends
-% null ($F(3,4306)=17.04$, $p<0.001$). The DiD estimate of $\hat{\mu}_2$
-% should therefore be interpreted as a lower-bound estimate of the
-% differential compression rather than a clean causal identification.
 The economic magnitude of $\hat{\mu}_2 = -10.76$ basis points is
 striking. During the relief window, Treasury-based spreads compressed by
 approximately 10.8 basis points more than non-Treasury spreads, relative
@@ -805,15 +742,9 @@ in the pre-period to 7.8 basis points during the relief window, a 70
 percent compression. The implied regulatory friction, $10.8$ basis points
 of additional compression attributable to the SLR relief, is
 broadly consistent with \citet{braeuning2024effect}.
-% , who estimate that
-% primary dealer leverage constraints account for 26--33\% of
-% Treasury bid-ask spreads; an SLR-driven reduction in the shadow cost
-% of Treasury positions would be expected to produce a multi-basis-point
-% compression over a year-long relief horizon.
 
 For the post-relief period, the interaction is $\hat{\mu}_4 = -9.03$
 basis points (SE $= 1.16$, $t = -7.79$). This coefficient measures the
-% SOURCE: tab:did_clean Panel B, TOTAL, mu4 row: coef=-9.03, SE=1.16, t=-7.79 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-9.026, se=1.1588, t=-7.789]
 Treasury differential in the post-relief period
 relative to 2019, and its magnitude indicates that Treasury-based spreads
 did not fully return to their pre-SLR-exclusion levels following expiry.
@@ -829,21 +760,11 @@ formal regulatory change.
 Testing whether the compression during the relief period equals the
 residual compression post-relief, we compute $\hat{\mu}_2 - \hat{\mu}_4 =
 -10.76 - (-9.03) = -1.73$ basis points. A Wald test of $H_0\colon \mu_2 = \mu_4$
-yields $F(1, 12{,}301) = 2.56$, $p = 0.11$.%, so the two interaction coefficients
-% SOURCE: investigation_outputs/reversion_test_results.txt: F(1,12301)=2.56, p=0.11 [investigation_outputs/task3_reversion.py]
-% are not statistically distinguishable at conventional significance levels
-% (95\% CI for the difference: $[-3.86, +0.39]$ bps).
-% SOURCE: investigation_outputs/reversion_test_results.txt: 95% CI [-3.86, +0.39] bps [investigation_outputs/task3_reversion.py]
-% The 95\% confidence interval for the reversion magnitude spans from
-% essentially zero to nearly 4 bps, meaning the data are consistent with
-% no reversion at all. The point estimate of $1.73 / 10.76 \approx 16$ percent
-% should be treated cautiously given this imprecision. What the data firmly
-% establish is: (1) 
+yields $F(1, 12{,}301) = 2.56$, $p = 0.11$.
 We can firmly claim that, first, treasury-based spreads compressed relative to non-Treasury
-spreads during the relief period % ($\hat{\mu}_2 = -10.76$ bps, $t = -9.37$, strongly significant); 
+spreads during the relief period 
 and, second, Treasury-based spreads remained substantially
 more compressed than their 2019 baseline through year-end 2021
-%($\hat{\mu}_4 =-9.03$ bps, $t = -7.79$, strongly significant). 
 The data do not establish
 that the SLR exclusion is the primary driver of the persistent compression,
 only that Treasury spreads did not return to their pre-exclusion levels
@@ -855,11 +776,6 @@ within the current design.%
 July~28, 2021, nearly four months after SLR expiry. The SRF's effect on
 spread persistence is speculative in the absence of a structural break test
 around July~2021, which is beyond the scope of the current paper.}
-% The \textsc{Direct} specification yields nearly identical results:
-% $\hat{\mu}_2 = -10.77$ basis points (SE $= 1.14$, $t = -9.46$) and
-% SOURCE: tab:did_clean Panel A, DIRECT, mu2 row: coef=-10.77, SE=1.14, t=-9.46 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-10.7696, se=1.1379, t=-9.464]
-% $\hat{\mu}_4 = -9.04$ basis points (SE $= 1.16$, $t = -7.80$). The
-% SOURCE: tab:did_clean Panel B, DIRECT, mu4 row: coef=-9.04, SE=1.16, t=-7.80 [audit_repairs/outputs/did_clean_baseline.csv; csv values: coef=-9.0448, se=1.16, t=-7.797]
  The sub-basis-point differences between \textsc{Total} and \textsc{Direct}
 coefficients replicate the stability documented in the exit event-window
 regressions and confirm that secured funding rate controls are irrelevant
@@ -867,15 +783,12 @@ to the Treasury differential in either regime.
 
 The non-Treasury baseline does shift substantially between specifications:
 $\hat{\mu}_1$ moves from $-1.34$ bps (\textsc{Total}) to $-11.03$ bps
-% SOURCE: tab:did_clean Panel A: TOTAL mu1=-1.34 (SE=1.13), DIRECT mu1=-11.03 (SE=2.97) [audit_repairs/outputs/did_clean_baseline.csv]
 (\textsc{Direct}), a change of nearly 10 basis points. This shift
 reflects the relationship between non-Treasury arbitrage spreads and the
 secured overnight funding rate (SOFR). Empirically, the estimated
 coefficient on SOFR in the non-Treasury spread regression is $-0.82$ bps
 per percentage point
-%($t = -3.56$)
 , meaning that higher SOFR is
-% SOURCE: investigation_outputs/direct_baseline_explanation.txt: SOFR coef=-0.82, t=-3.56 [investigation_outputs/task5_direct_baseline.py] — NOT in any draft table
 associated with {lower} non-Treasury $|W|$ across the sample.
 SOFR fell sharply during the relief period---from approximately 2.4
 percent in 2019 to near zero---implying that, holding all else fixed,
@@ -884,24 +797,22 @@ $0.82 \times 2.4 \approx 2.0$ bps {higher} than in the pre-period.
 This back-of-envelope accounts for only part of the observed $\approx 10$ bps
 shift in $\hat{\mu}_1$ across specifications; the remaining gap reflects
 the contributions of the other \textsc{Direct} controls
-%(TGCR--SOFR spread, rolling issuance volumes) 
 and nonlinearities not captured by this
 single-coefficient calculation. A full decomposition of the baseline shift
 across all \textsc{Direct} controls is beyond the scope of the current
 paper. Importantly, this uncertainty about the non-Treasury baseline does
 not affect the paper's primary claim: the Treasury interaction $\hat{\mu}_2$
 is stable to within 0.01 bps
-%($-10.76$ vs.\ $-10.77$) 
 across specifications,
 confirming that the differential compression of Treasury-based spreads is
 orthogonal to SOFR dynamics. This stability---not the baseline coefficient---is
-the paper's key identification claim.
+the paper's key empirical claim.
 
 \subsubsection{The Entry Event and COVID Contamination}
 \label{sec:entry}
 
 
-The entry event (April 1, 2020) cannot provide clean identification.
+The entry event (April 1, 2020) cannot provide clean evidence.
 The $W = 60$ pre-period spans the acute phase of the COVID-19 financial
 crisis, during which the
 Federal Reserve simultaneously cut rates to zero, launched emergency repo
@@ -918,69 +829,9 @@ February--March 2020 crash period, it recovers a precisely estimated
 and strongly significant differential compression (see
 Table~\ref{tab:did_clean}), confirming the balance sheet channel over
 the full relief horizon. The exit event-window and clean DiD are the
-paper's two identification results; the entry event-window is
+paper's two primary results; the entry event-window is
 supplementary.
 
-
-% I now turn to the entry event (April 1, 2020).
-% % The event-window
-% % specification at $W = 60$ yields $\hat{\beta} = -4.54$ basis points
-% % (\textsc{Total}, SE $= 3.00$, $t = -1.51$) and $\hat{\beta} = -4.52$
-% % % SOURCE: tab:pooled_jump Panel A, Entry W=60 TOTAL, Post×TreasuryBased: coef=-4.54, SE=3.00, t=-1.51; tab:dk_robustness Entry TOTAL Post×Treas: SE_NW=3.003, t_NW=-1.51 [audit_repairs/outputs/jump_estimates_pooled.csv]
-% % basis points (\textsc{Direct}, SE $= 3.00$, $t = -1.51$)---negative as
-% % % SOURCE: tab:pooled_jump Panel A, Entry W=60 DIRECT, Post×TreasuryBased: coef=-4.52, SE=3.00, t=-1.51; tab:dk_robustness Entry DIRECT Post×Treas: SE_NW=2.995, t_NW=-1.51 [audit_repairs/outputs/jump_estimates_pooled.csv]
-% % the hypothesis predicts, but not statistically distinguishable from zero
-% % at conventional significance levels. The narrow $W = 20$ window produces
-% % smaller and noisier estimates: $\hat{\beta} = -2.16$ and $-2.23$ basis
-% % points under \textsc{Total} and \textsc{Direct}, respectively, both with
-% % $t$-statistics below $0.40$.
-% % SOURCE: tab:robustness Entry W=20 Post×Treas: TOTAL t=-0.35, DIRECT t=-0.36; tab:pooled_jump Panel A Entry W=20 Post×Treas: coef=-2.16(TOTAL), -2.23(DIRECT) [audit_repairs/outputs/jump_estimates_pooled.csv]
-% The failure to identify a significant entry effect is not evidence against
-% the balance sheet channel. The pre-period for the $W = 60$ entry window
-% spans approximately January 8 through March 31, 2020---the acute phase
-% of the COVID-19 financial crisis. During this interval, UST spot-futures
-% spreads reached extreme levels,
-% %(pre-period mean $|W| \approx 25.6$ basis points, with substantial upside variance from the COVID peak),
-% the Federal
-% Reserve simultaneously cut the federal funds rate to zero and launched
-% emergency repo operations and outright Treasury purchases, and the
-% bilateral dollar swap line network was dramatically expanded.
-% These concurrent interventions confound the identification of the
-% SLR relief's marginal effect on Treasury spreads. 
-% % Specifically, the
-% % non-Treasury baseline coefficient at $W = 60$ shifts from $\hat{\gamma}
-% % = -7.08$ basis points under \textsc{Total} to $-2.76$ basis points under
-% % % SOURCE: tab:pooled_jump Panel A, Entry W=60: Post TOTAL=-7.08 (SE=3.05), Post DIRECT=-2.76 (SE=5.54) [audit_repairs/outputs/jump_estimates_pooled.csv]
-% % \textsc{Direct}---a change of 4.3 basis points---when the SOFR rate and
-% % TGCR-SOFR spread are added as controls, while the SE of the baseline
-% % coefficient nearly doubles (3.05 to 5.54). This instability---much
-% % larger than the sub-basis-point shifts observed at exit---reflects high
-% % collinearity between the SOFR controls and the entry $\mathrm{Post}_t$
-% % indicator: SOFR dropped sharply at nearly the same time as the SLR
-% % entry, making it difficult to separately identify their contributions
-% % to non-Treasury spread movements. The corresponding Treasury interaction
-% % coefficient is stable across specifications ($\Delta\hat{\beta} < 0.02$
-% % basis points), but the contaminated baseline makes the entry estimate
-% % difficult to interpret in isolation.
-% Section~\ref{sec:did_clean} resolves this ambiguity.
-% By conditioning on the 2019 pre-COVID baseline and excluding the
-% February-March 2020 crash period, the design recovers a precisely
-% estimated $\hat{\mu}_2 = -10.76$ basis points with $t = -9.37$,
-% % SOURCE: tab:did_clean Panel A, TOTAL, mu2: coef=-10.76, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv]
-% consistent with the hypothesis that the SLR relief produced substantial
-% differential compression in Treasury-based spreads during the exclusion
-% period.
-% I treat the exit event-window as the primary identification result and
-% the entry DiD as the complementary whole-sample estimate. These
-% two estimates are not directly comparable in magnitude: the exit
-% event-window $\hat{\beta} = +3.84$ bps captures the re-widening over
-% a 60-trading-day post-expiry horizon, while $\hat{\mu}_2 = -10.76$ bps
-% accumulates over 12 months of active relief relative to a 2019
-% pre-COVID counterfactual---different horizons, different windows, and
-% different control counterfactuals. Both directionally confirm the
-% balance sheet channel. The entry event-window estimates are reported
-% in Table~\ref{tab:pooled_jump} for completeness, with an explicit
-% flag that the pre-period is contaminated.
 
 \subsubsection{Falsification: Non-Treasury Series as Controls}
 \label{sec:falsification}
@@ -1010,7 +861,6 @@ persists through April--May~2021 at roughly 10--11~bps and the same
 pattern appears in non-SLR-exit years. Excluding CIP-AUD leaves
 the primary Post$\times$TreasuryBased coefficient essentially unchanged
 (Table~\ref{tab:series_level}, note).
-% SOURCE: investigation_outputs/task1_output.txt: coef=+3.81, t=4.19 without CIP-AUD
 }
 Equity series showed no response to the SLR expiry (Table~\ref{tab:series_level},
 Panel~D). SPX and INDU are near zero; NDX is marginally significant but
@@ -1025,116 +875,16 @@ series is left for future work.%
 compressing while equity widens across regimes
 (Table~\ref{tab:summary_stats}; Figure~\ref{fig:regime_boxplots})---mean
 that the pooled non-Treasury baseline $\hat{\gamma}$ averages over
-divergent trends. The key identification claim is on the Treasury
+divergent trends. The key empirical claim is on the Treasury
 differential $\hat{\beta}$, not the baseline level.}
 
 At entry, several CIP series compressed sharply (Table~\ref{tab:series_level}),
-% SOURCE: audit_repairs/outputs/jump_estimates_by_series.csv, Entry W=60 DIRECT
 while all equity series were insignificant. The CIP compressions
 reflect the Federal Reserve's bilateral swap line activations---a dollar
 liquidity channel---rather than the SLR relief. The \textsc{Direct}
 specification controls for SOFR and TGCR-SOFR precisely to separate these
 channels; the Treasury interaction remains stable across specifications
 while the non-Treasury baseline absorbs the funding-rate effect.
-
-% A central feature of my design is that CIP deviations and equity
-% spot-futures spreads serve not merely as controls in a pooled regression
-% but as active falsification tests. The logic is that of \citet{siriwardane2025segmented}:
-% if arbitrage is segmented by balance sheet type, then a regulatory shock that is specific to Treasuries should move
-% Treasury-based spreads without moving non-Treasury spreads. A finding
-% that CIP or equity bases responded symmetrically to the SLR events would
-% be inconsistent with segmented balance sheets and would suggest instead
-% that the events captured a broader contemporaneous shock to intermediary
-% health.
-
-% The data strongly support the falsification hypothesis. For the exit event
-% at $W = 60$, $\hat{\gamma} = -3.09$ basis points ($t = -3.72$),
-% % SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post: coef=-3.09, SE=0.83, t=-3.72 [audit_repairs/outputs/jump_estimates_pooled.csv]
-% indicating that non-Treasury spreads continued to compress in the
-% post-expiry window on average. This pooled figure masks substantial
-% heterogeneity: individual CIP series compress by $-4.3$ to $-6.2$ bps
-% (all significant), while equity series are near zero. This pattern
-% reflects the ongoing secular normalization of dollar funding markets
-% following the COVID-19 stress episode \citep{du2018deviations}, not any
-% response to the SLR expiry.%
-% \footnote{The opposing dynamics of CIP and equity within the non-Treasury
-% control group---CIP compressing from 31.1 to 17.2 bps while equity
-% widens from 32.8 to 50.9 bps across regimes (Table~\ref{tab:summary_stats}; Figure~\ref{fig:regime_boxplots})---
-% mean that the near-zero $\hat{\mu}_1 = -1.34$ bps in the DiD
-% may partly reflect canceling trends rather than common pre-treatment
-% stability. The series-level evidence (Table~\ref{tab:series_level})
-% shows these opposing dynamics clearly; the pooled $\hat \gamma$ treats them
-% symmetrically by design. The key identification claim remains on
-% the Treasury differential, not the absolute level of the pooled
-% non-Treasury baseline.} Within the
-% non-Treasury group, CIP deviations for EUR, CHF, JPY, and SEK continued
-% to decline
-% %(series-level post-coefficients $\hat{c}_i$ from
-% % equation~(\ref{eq:did}), estimated series-by-series, ranging from $-4.3$ to $-6.2$
-% % basis points, each significant at the 5\% level)
-% , while CAD, NZD, and GBP showed small,
-% mixed, and generally insignificant responses. CIP-AUD is a notable
-% exception, exhibiting a significant positive response 
-% %($+4.32$ bps,$t = 4.19$)
-% , consistent with Japanese fiscal year-end effects rather than
-% % SOURCE: tab:series_level Panel C, CIP-AUD: coef=+4.32, SE=1.03, t=+4.19 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% the SLR expiry---a calendar-driven phenomenon that is structurally
-% unrelated to the balance sheet channel (Classification~B; see
-% footnote).%
-% \footnote{Japanese institutions routinely repatriate U.S.\ dollars at
-% March~31---the exact date of the SLR exit---via yen-denominated funding
-% operations. The AUD-USD basis is directly affected because Japanese
-% financial institutions and AUD-funded carry-trade vehicles unwind
-% cross-currency positions at fiscal year-end, reducing the supply of
-% AUD-USD swap liquidity and mechanically widening the AUD basis alongside
-% the JPY basis. The elevated CIP-AUD spread persists through
-% April--May~2021 at roughly 10--11~bps, consistent with post-COVID AUD
-% funding normalization rather than any regulatory response; the same
-% pattern appears in non-SLR-exit years. This is therefore a
-% calendar-driven effect (Classification~B: real economic phenomenon,
-% not a data error or a treatment-group spillover). Excluding CIP-AUD
-% from the pooled regression leaves the primary
-% Post$\times$TreasuryBased coefficient essentially unchanged at
-% $+3.81$ bps ($t = 4.19$), confirming the falsification design is
-% % SOURCE: investigation_outputs/task1_output.txt (pooled regression without CIP-AUD): coef=+3.81, t=4.19 [investigation_outputs/task1_cip_aud.py] — NOT in any draft table
-% robust to this series.}
-
-% Equity spot-futures spreads showed no response to the SLR expiry. The
-% series-level post-coefficients at $W = 60$ under \textsc{Direct} are
-% $-0.72$ basis points for SPX (SE $= 1.47$, $t = -0.49$), $-4.47$ basis
-% % SOURCE: tab:series_level Panel D, Eq.SPX: coef=-0.72, SE=1.47, t=-0.49 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% points for NDX (SE $= 2.64$, $t = -1.69$, marginally significant), and
-% % SOURCE: tab:series_level Panel D, Eq.NDX: coef=-4.47, SE=2.64, t=-1.69 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% $-0.21$ basis points for INDU (SE $= 1.72$, $t = -0.12$). These
-% % SOURCE: tab:series_level Panel D, Eq.INDU: coef=-0.21, SE=1.72, t=-0.12 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% estimates are economically small for SPX and INDU, and the NDX coefficient
-% ($-4.47$ bps, marginally significant at 10\%) is comparable in magnitude
-% to the pooled Treasury treatment effect of $+3.84$ bps. No joint test
-% across equity series is reported here; a joint test should be incorporated
-% in future work to assess the group's aggregate falsification power. The
-% directional sign (equity series compressing slightly, rather than widening)
-% is consistent with the conservative-attenuation interpretation noted in
-% the data section and is not consistent with an equity channel that would
-% produce positive treatment-like responses. This is precisely the pattern predicted by
-% funding and balance sheet segmentation: the SLR exclusion directly
-% removed Treasuries from the leverage denominator, so only intermediaries
-% funding Treasury positions---not equity derivatives arbitrageurs---should
-% have responded.
-
-% For the entry event, 5 of 11 non-Treasury series show significant
-% compression (CIP-CHF: $-30.9$ bps, $t = -6.4$; CIP-EUR: $-40.4$ bps,
-% $t = -5.3$; CIP-GBP: $-13.7$ bps, $t = -5.1$; CIP-SEK: $-28.3$ bps,
-% $t = -7.0$; CIP-AUD marginally), while all three equity series are
-% % SOURCE: audit_repairs/outputs/jump_estimates_by_series.csv, Entry W=60 DIRECT, individual series — NOT in any draft table; values: CIP-CHF=-30.9(t=-6.4), CIP-EUR=-40.4(t=-5.3), CIP-GBP=-13.7(t=-5.1), CIP-SEK=-28.3(t=-7.0)
-% insignificant ($|t| < 0.40$). The large CIP compressions at entry
-% reflect the effect of the Federal Reserve's bilateral swap line
-% activations rather than the SLR relief---a channel running through the
-% supply of dollar liquidity rather than through regulatory balance sheet
-% capacity. This distinction reinforces the importance of the
-% \textsc{Direct} specification, which controls for SOFR and TGCR-SOFR,
-% and confirms that the entry-period CIP responses are attributable to the
-% dollar funding channel rather than the balance sheet channel operative
-% for Treasuries.
 
 \subsubsection{Series-Level Evidence}
 \label{sec:series}
@@ -1157,19 +907,8 @@ Table~\ref{tab:series_level} and Figure~\ref{fig:series_level_coefs} report the 
 (\ref{eq:did}) without the $\mathrm{TreasuryBased}_i$ interaction, using
 the $W = 60$ \textsc{Direct} window for the exit event. Three of six
 Treasury-based series show significant re-widening at expiry.
-% : UST
-% spot-futures 5y ($+4.05$ bps, $t = 2.98$), UST spot-futures 10y ($+4.83$
-% % SOURCE: tab:series_level Panel A, UST SF 5y: coef=+4.05, SE=1.36, t=+2.98 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% bps, $t = 2.64$), and UST spot-futures 2y ($+2.47$ bps, $t = 1.76$,
-% % SOURCE: tab:series_level Panel A, UST SF 10y: coef=+4.83, SE=1.83, t=+2.64 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% significant at ten percent). 
 The TIPS-Treasury series show heterogeneous
-% SOURCE: tab:series_level Panel A, UST SF 2y: coef=+2.47, SE=1.41, t=+1.76 [audit_repairs/outputs/jump_estimates_by_series.csv]
 responses.
-% : TIPS 2y shows a significant compression of $-8.28$ basis
-% points ($t = -2.01$), opposite to the direction the balance sheet
-% % SOURCE: tab:series_level Panel B, TIPS 2y: coef=-8.28, SE=4.12, t=-2.01 [audit_repairs/outputs/jump_estimates_by_series.csv]
-% hypothesis predicts, while TIPS 5y and 10y are near zero and insignificant.
 The heterogeneity across Treasury-based series is itself informative.
 UST spot-futures arbitrage is a high-frequency, balance sheet-intensive
 trade executed primarily by primary dealers through the repo market;
@@ -1247,19 +986,14 @@ ${}^{***}\,p<0.01$; ${}^{**}\,p<0.05$; ${}^{*}\,p<0.10$.
   TIPS-Treasury, filled circles) are shown separately from non-Treasury
   controls (CIP and equity spot-futures, open circles). Positive values
   indicate spread widening post-expiry. 
-  % Source: \texttt{audit\_repairs/outputs/jump\_estimates\_by\_series.csv}.
   }
   \label{fig:series_level_coefs}
 \end{figure}
 
-% \paragraph{The TIPS 2y anomaly.}
-% \label{sec:tips_anomaly}
 The TIPS~2y series is the one Treasury-based observation inconsistent with the
 balance sheet hypothesis at expiry: its post-coefficient is $-8.28$ basis
 points,
-%($t = -2.01$), 
 indicating continued compression rather than re-widening.
-% SOURCE: tab:series_level Panel B, TIPS 2y: coef=-8.28, SE=4.12, t=-2.01 [audit_repairs/outputs/jump_estimates_by_series.csv]
 Several non-mutually-exclusive explanations are consistent with this finding.
 The TIPS~2y spread takes positive values in this sample---the summary
 statistics in Table~\ref{tab:summary_stats} show $\overline{W} \approx +3$ bps
@@ -1304,13 +1038,8 @@ window sizes, and both coefficients of interest. The key quantities are
 $\Delta\hat{\beta}$ and $\Delta t$.
 For the exit event, the Treasury interaction is highly stable across
 specifications.
-% : the two reported point estimates (3.84 bps under
-% \textsc{Total} and 3.84 bps under \textsc{Direct}) round identically to
-% two decimal places, with $|\Delta t| < 0.02$ across all exit specifications.
-% (Two estimates that both round to 3.84 bps could differ by up to 0.01 bps;
-% the sub-rounding stability is confirmed in the underlying CSV output.) 
 For the entry event, the Treasury interaction
-is similarly stable %($|\Delta\hat{\beta}| < 0.02$, $|\Delta t| < 0.01$),
+is similarly stable 
 while the non-Treasury baseline shifts substantially---as discussed in
 Section~\ref{sec:entry}. This asymmetry is exactly what the balance sheet
 channel predicts: the SLR relief operates through leverage capacity, not
@@ -1330,14 +1059,10 @@ Treasury differential.
   Table~\ref{tab:did_clean} is included for reference. All exit estimates
   are positive and significant; all entry estimates are negative but
   insignificant. 
- %Source:
-  % \texttt{audit\_repairs/outputs/jump\_estimates\_pooled.csv} and
-  % \texttt{audit\_repairs/outputs/did\_clean\_baseline.csv}.}
   }
   \label{fig:coef_plot}
 \end{figure}
 
-% \paragraph{Winsorization.}
 Spread series are winsorized at the first and 99th percentiles within
 each series prior to estimation. The winsorization log in
 Table~\ref{tab:winsorize} confirms symmetric clipping of approximately
@@ -1351,7 +1076,6 @@ the extreme observation would exert disproportionate influence on the HAC
 covariance matrix during the entry window. All main results are
 quantitatively unchanged under alternative clipping thresholds of p5/p95.
 
-% \paragraph{Driscoll-Kraay standard errors.}
 Newey-West HAC standard errors account for serial correlation within
 each series but assume cross-sectional independence. In my setting,
 all arbitrage spreads are exposed to common shocks (monetary policy,
@@ -1363,7 +1087,6 @@ cross-sectional dependence. Standard errors are computed using the
 Bartlett kernel with five lags, matching the main specification.
 The finding that DK standard errors for the exit Treasury interaction are
 {smaller} than Newey-West standard errors (0.68 vs.\ 0.89 bps) deserves
-% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: SE_DK=0.683, SE_NW=0.889 [audit_repairs/outputs/dk_robustness.csv]
 explanation. Driscoll-Kraay SEs are often described as more conservative
 than panel NW SEs, but that comparison applies when NW is computed treating
 each series observation as independent (understating cross-sectional
@@ -1374,37 +1097,30 @@ dimension by a factor of 17, producing upward-biased NW
 SEs relative to the true time-only precision. The DK estimator, by
 first averaging score contributions cross-sectionally, treats each calendar
 day as a single effective observation.
-%(reducing the effective sample to $T \approx 121$ time periods). 
 For the $\mathrm{Post} \times
 \mathrm{TreasuryBased}$ interaction, which is identified by the differential
 post-event movement of the two groups, this cross-sectional averaging
-removes common-factor noise %(shocks hitting all 17 series similarly in a day) 
+removes common-factor noise 
 while retaining the between-group differential that identifies $\hat{\beta}$. At entry,
 the opposite pattern holds: the COVID crash induced strong co-movement across
 all arbitrage series, which DK correctly penalizes (DK SE = 6.32 vs.\ NW SE
 = 3.00 bps), correctly reducing the $t$-statistic from $-1.51$ to $-0.72$.
-% SOURCE: tab:dk_robustness, Entry TOTAL Post×Treas: SE_DK=6.323 vs SE_NW=3.003, t_NW=-1.51, t_DK=-0.72 [audit_repairs/outputs/dk_robustness.csv]
 
 Table~\ref{tab:dk_robustness} reports DK standard errors for the key
 coefficients at $W = 60$. For the exit event, the Treasury interaction
 yields $t_{\text{DK}} = +5.62$ (\textsc{Total}) and $+5.65$
 (\textsc{Direct}), compared to $t_{\text{NW}} = +4.32$ and $+4.34$ under
-% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: t_DK=+5.62; Exit DIRECT Post×Treas: t_DK=+5.65; t_NW=+4.32(TOTAL), +4.34(DIRECT) [audit_repairs/outputs/dk_robustness.csv]
 Newey-West. The DK standard error is {smaller} than the NW
 standard error (0.683 vs.\ 0.889 bps) because the cross-sectional
-% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: SE_DK=0.683, SE_NW=0.889 [audit_repairs/outputs/dk_robustness.csv]
 averaging of score contributions removes the common-factor noise while
 retaining the series-specific identifying variation. For the entry
 event, the DK standard error for the Treasury interaction is substantially
 larger (6.32 vs.\ 3.00 bps), reducing $t_{\text{DK}}$ to $-0.72$,
-% SOURCE: tab:dk_robustness, Entry TOTAL Post×Treas: SE_DK=6.323, SE_NW=3.003, t_DK=-0.72, t_NW=-1.51 [audit_repairs/outputs/dk_robustness.csv]
 consistent with the interpretation that the COVID crash induced strong
 cross-sectional co-movement that NW does not fully correct for. The
 non-Treasury baseline at entry remains significant under DK for the
 \textsc{Total} specification ($t_{\text{DK}} = -2.62$), but not for
-% SOURCE: tab:dk_robustness, Entry TOTAL Post: t_DK=-2.62 [audit_repairs/outputs/dk_robustness.csv]
 \textsc{Direct} ($t_{\text{DK}} = -0.64$), consistent with the
-% SOURCE: tab:dk_robustness, Entry DIRECT Post: t_DK=-0.64 [audit_repairs/outputs/dk_robustness.csv]
 interpretation that SOFR controls absorb the funding-channel
 co-movement that drives the entry-period compression of non-Treasury
 spreads.
@@ -1447,7 +1163,6 @@ ${}^{***}\,p<0.01$, ${}^{**}\,p<0.05$.
 \end{tablenotes}
 \end{table}
 
-% \paragraph{Limitations.}
 Six identification limitations warrant explicit discussion.
 First, the SLR relief is a single nationwide policy change, not a
 staggered rollout. The \citet{callaway2021difference} estimator is
@@ -1460,15 +1175,14 @@ instead whether some other event contemporaneous with the SLR entry or
 exit differentially affected Treasury-based versus non-Treasury spreads.
 The parallel-trends evidence from the DiD 2019 baseline
 (Section~\ref{sec:did_clean}, $\hat{\mu}_1 = -1.34$ bps, $t = -1.19$)
-% SOURCE: tab:did_clean Panel A, TOTAL, mu1: coef=-1.34, SE=1.13, t=-1.19 [audit_repairs/outputs/did_clean_baseline.csv]
 provides the sharpest rebuttal to this concern: Treasury-based and
 non-Treasury spreads were on the same trend before the SLR event and
 diverged only when the relief took effect.
 
 Second, as detailed in Section~\ref{sec:entry}, the pre-period for the
 entry event coincides with the COVID-19 stress episode. I address this
-by treating the exit event as the primary identification and the clean
-DiD (Section~\ref{sec:did_clean}) as the whole-sample complement.
+by treating the exit event as the primary source of evidence and the
+clean DiD (Section~\ref{sec:did_clean}) as the whole-sample complement.
 
 Third, the CIP-EUR series contains a single extreme observation
 at $432.4$ basis points (absolute value) in March 2020, driven by the
@@ -1484,11 +1198,7 @@ bucket. These controls are included to isolate the balance sheet channel
 from mechanical Treasury supply effects. Their estimated coefficients are
 economically small and statistically indistinguishable from zero across
 all exit specifications,
-%(e.g., $W=60$ \textsc{Direct}: $\hat{\delta}_{7} =
-% -0.001$ bps per billion, SE $= 0.002$; $\hat{\delta}_{30} = -0.003$ bps
-% per billion, SE $= 0.004$), 
 and inclusion of these controls does not
-% SOURCE: audit_repairs/outputs/jump_estimates_pooled.csv DIRECT spec control coefficients — NOT tabulated in draft; values from repaired_pipeline.py output [audit_repairs/repaired_pipeline.py]
 meaningfully change the key Treasury interaction (see
 Table~\ref{tab:robustness}). The absence of a supply effect on the
 Treasury differential is consistent with the balance sheet channel: the
@@ -1515,7 +1225,6 @@ rule of thumb of $T^{1/4}$ lags for a sample of $T \approx 121$ trading
 days suggests $\approx 3$--$4$ lags for the event-window regressions,
 consistent with the choice of five. The Driscoll-Kraay results (which
 strengthen the exit Treasury interaction to $t_{\text{DK}} = 5.62$)
-% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: t_DK=+5.62 [audit_repairs/outputs/dk_robustness.csv]
 provide reassurance that the primary inference is not sensitive to the
 autocorrelation correction, though a formal sensitivity analysis with
 20 or more lags would further address this concern for the long
@@ -1772,15 +1481,12 @@ that the expiry of regulatory relief is associated with Treasury-based
 arbitrage spreads widening
 by $3.84$ basis points more than non-Treasury spreads in the subsequent
 60 trading days ($t = 4.32$, $p < 0.01$), with the estimate stable to the
-% SOURCE: tab:pooled_jump Panel A, Exit W=60 TOTAL, Post×TreasuryBased: coef=+3.84, SE=0.89, t=4.32 [audit_repairs/outputs/jump_estimates_pooled.csv]
 one-hundredth of a basis point across control structures and robust to
 cross-sectional dependence (Driscoll-Kraay $t = 5.62$). A full-period
-% SOURCE: tab:dk_robustness, Exit TOTAL Post×Treas: t_DK=+5.62, SE_DK=0.683 [audit_repairs/outputs/dk_robustness.csv]
 difference-in-differences estimates that Treasury spreads compressed by
 $10.76$ basis points more than non-Treasury spreads during the relief
 window, relative to the 2019 pre-COVID
 baseline ($t = -9.37$). Non-Treasury series---CIP deviations for eight G-10
-% SOURCE: tab:did_clean Panel A, TOTAL, mu2: coef=-10.76, SE=1.15, t=-9.37 [audit_repairs/outputs/did_clean_baseline.csv]
 currencies and equity spot-futures for three major indices---show no comparable
 break at the SLR event dates, passing the falsification tests that are the
 design's primary identification safeguard.
@@ -1798,7 +1504,6 @@ balance sheets are indeed marginal for Treasury spot-futures arbitrage and that 
 regulatory effect is detectable in market prices within a 20-trading-day window.
 The UST spot-futures series compressed by approximately 70\% during the
 relief period, 
-%(pre-period mean $25.6$ bps to $7.8$ bps during relief), 
 and the
 cross-strategy divergence at expiry is economically meaningful relative to the
 26--33\% shadow cost of primary dealer leverage constraints estimated by
@@ -1820,7 +1525,6 @@ cross-sectional identification that the current design cannot. Second, the point
 implies approximately 16\% of the relief-period compression reversed
 in the nine-month post-expiry window, though this figure is statistically
 imprecise.
-%($p = 0.11$; the 95\% CI spans essentially zero to $-3.86$ bps)
 This suggests that the
 structural impact of the exclusion, combined with concurrent Fed balance sheet
 expansion and the launch of the Standing Repo Facility, may have durably
@@ -1830,24 +1534,8 @@ response of each spread to be estimated flexibly over post-event horizons,
 which would be informative about the speed of arbitrage capital reallocation
 following the regulatory change.
 
-% ── Bibliography ──────────────────────────────────────────────────────────
-% natbib is loaded above (\usepackage{natbib}).
-% Use \citet{key} for inline "Author (Year)" and \citep{key} for "(Author, Year)".
-%
-% Style options (uncomment one):
-%   plainnat  — author-year, alphabetical, always available with natbib
-%   abbrvnat  — author-year, abbreviated first names
-%   jf        — Journal of Finance style (requires jf.bst to be installed)
-%
 \bibliographystyle{jf}
 \bibliography{nsf_references}
-%
-% All BibTeX entries are in presentations/references.bib
-% Cite keys used in this section:
-%   siriwardane2025segmented, du2018deviations, fleckenstein2014tips,
-%   he2017intermediary, callaway2021difference, driscoll1998consistent,
-%   liang2020enhancing, favara2024leverage, braeuning2024effect, cochran2023dealers
-% NOTE: favara2024leverage has VERIFY flag — confirm journal publication status.
 
 
 \end{document}
