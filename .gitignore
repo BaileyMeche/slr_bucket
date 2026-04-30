@@ -26,6 +26,10 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+.doit*
+.claire/
+doit*
+
 # Python Bytecode & Cache
 __pycache__/
 *.py[cod]

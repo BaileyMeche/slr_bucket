@@ -1,3 +1,0 @@
-spec,sample,n,n_pre_period,n_relief_period,n_post_period,r2,coef_relief,se_relief,t_relief,coef_relief_x_treas,se_relief_x_treas,t_relief_x_treas,coef_post_relief,se_post_relief,t_post_relief,coef_post_relief_x_treas,se_post_relief_x_treas,t_post_relief_x_treas,controls_used
-TOTAL,2019 pre-COVID baseline (excl Feb-Mar 2020),12326,4713,4335,3286,0.5163985013603941,-1.3403,1.1294,-1.187,-10.763,1.1491,-9.366,-6.9222,1.0091,-6.86,-9.026,1.1588,-7.789,"['VIX', 'HY_OAS', 'BAA10Y']"
-DIRECT,2019 pre-COVID baseline (excl Feb-Mar 2020),12326,4713,4335,3286,0.520672257842429,-11.0308,2.9661,-3.719,-10.7696,1.1379,-9.464,-14.8655,2.7971,-5.315,-9.0448,1.16,-7.797,"['VIX', 'HY_OAS', 'BAA10Y', 'SOFR_rate', 'spr_tgcr', 'issu_7_bil', 'issu_14_bil', 'issu_30_bil']"

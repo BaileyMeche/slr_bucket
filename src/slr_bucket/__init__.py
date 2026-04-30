@@ -1,5 +1,1 @@
-"""SLR bucket analysis toolkit."""
-
-__all__ = [
-    "config",
-]
+"""slr_bucket — SLR exclusion event study package."""
