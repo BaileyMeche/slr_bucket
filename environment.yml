@@ -1,4 +1,4 @@
-name: slr_bucket
+name: slr
 channels:
   - conda-forge
   - defaults

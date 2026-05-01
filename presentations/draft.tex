@@ -87,12 +87,12 @@ non-Treasury controls. Using a pooled difference-in-differences design
 across 17 daily arbitrage spread series in four strategy classes 
 (Treasury spot-futures, TIPS-Treasury, covered interest parity, and equity
 spot-futures), I find that during the relief window Treasury spreads
-were compressed by 10.76 basis points more than non-Treasury spreads
+ compressed by 10.76 basis points more than non-Treasury spreads
 relative to the 2019 pre-COVID baseline, and  re-widened  at expiry by 3.84
-basis points more in the subsequent 60 trading days. Non-Treasury series
+basis points  in the subsequent 60 trading days. Non-Treasury series
 show no comparable break at the SLR event dates. This behavior is consistent
 with balance-sheet segmentation rather than a general intermediary funding
-shock and yields an arbitrage-spread-based estimate of the leverage-ratio friction in Treasury markets.
+shock and yields an arbitrage-spread-based estimate of the leverage ratio friction in Treasury markets.
 
 \bigskip
 \noindent\textbf{Keywords:} \keywords
@@ -313,7 +313,7 @@ liquidity are most reliable across the 2019--2021 sample. The construction
 follows \cite{siriwardane2025segmented}, who apply the same methodology
 for the 2-, 5-, 10-, 20-, and 30-year tenors over 2010--2020.
 \paragraph{CIP Arbitrage.} Following \cite{du2018deviations}, for each of eight G-10 currencies (AUD, CAD, CHF, EUR, GBP, JPY, NZD, SEK) I define the 3-month CIP basis as the difference between the dollar OIS rate and the synthetic forward-implied rate from currency spot and forward quotes. I examine all eight individually and present pooled and series-level results; the mean across currencies is used for strategy-class summary statistics.
-\paragraph{Equity Spot--Futures Spread.} For three equity indexes (SPX, INDU, NDX) I calculate the rate implied by equity index futures (accounting for dividends) and subtract the short-term Treasury yield. This spread is based on the violation of stock spot--futures parity.
+\paragraph{Equity Spot--Futures Arbitrage.} For three equity indexes (SPX, INDU, NDX) I calculate the rate implied by equity index futures (accounting for dividends) and subtract the short-term Treasury yield. This spread is based on the violation of stock spot--futures parity.
 \footnote{The equity spot-futures spread mechanically depends on
 short-term Treasury yields through its construction. If the SLR
 exclusion affected Treasury yield levels, it could in principle compress
@@ -1049,8 +1049,7 @@ operations, and expanded bilateral swap lines. These concurrent
 interventions make it impossible to isolate the SLR relief's marginal
 contribution from a severely contaminated baseline. Entry event-window
 estimates are reported in Table~\ref{tab:pooled_jump} for completeness
-and flagged accordingly; they are negative in sign (consistent with the
-hypothesis) but insignificant.
+and flagged accordingly; they are negative in sign as expected but insignificant.
 
 The clean DiD of Section~\ref{sec:did_clean} addresses this directly.
 By conditioning on the 2019 pre-COVID baseline and excluding the
@@ -1077,7 +1076,7 @@ intermediary health rather than a balance sheet channel.
 The data support the falsification hypothesis at exit. Non-Treasury
 spreads continued to compress slightly in the post-expiry window
 (Table~\ref{tab:pooled_jump}), reflecting secular normalization of dollar
-funding markets \parencite{du2018deviations}---not a response to the SLR
+funding markets \parencite{du2018deviations} and not a response to the SLR
 expiry. Within CIP, EUR/CHF/JPY/SEK continued to decline while
 CAD/NZD/GBP were small and mixed; CIP-AUD widened significantly but
 this is consistent with Japanese fiscal year-end repatriation flows
@@ -1099,7 +1098,7 @@ Section~\ref{sec:data} rather than any regulatory response. The SLR
 exclusion directly reduced the leverage cost of holding Treasuries, not
 equity derivatives, so the absence of an equity response is the predicted
 outcome under balance sheet segmentation. A joint test across equity
-series is left for future work.%
+series is recommended for future work.%
 \footnote{The opposing dynamics within the non-Treasury group---CIP
 compressing while equity widens across regimes
 (Table~\ref{tab:summary_stats}; Figure~\ref{fig:regime_boxplots})---mean
@@ -1634,7 +1633,7 @@ The most direct contribution of this paper is to the segmented arbitrage
 research program of \cite{siriwardane2025segmented}. They identify
 balance-sheet segmentation through two events: the 2012 London Whale
 episode, in which JPMorgan's risk-limit tightening differentially widened
-the equity spot-futures spreads it intermediated; and hedge-fund return
+the equity spot-futures spreads it intermediated as well as hedge-fund return
 correlations linking specific arbitrage spreads to specific intermediary
 types. The 2020--2021 SLR exclusion provides a third event study of the
 same logical structure, with three features that complement their evidence.
@@ -1749,10 +1748,11 @@ intermediary. The 2020--2021 SLR exclusion is a positive
 balance-sheet shock to a regulatorily-defined class of intermediaries,
 operates over a one-year window with both onset and expiry observable,
 and falls entirely outside the authors' February~2020 sample cutoff.
-The pattern of differential compression of
-Treasury-based spreads during relief, partial reversal at expiry, no
-comparable response in non-Treasury controls that this paper documents is the signature
-balance-sheet segmentation predicts under their framework, identified
+The pattern of differential compression 
+% of
+% Treasury-based spreads during relief, partial reversal at expiry, no
+% comparable response in non-Treasury controls that this paper documents 
+is the signature balance-sheet segmentation predicts under their framework, identified
 on a shock and a horizon their evidence did not include.
 
 The results also speak to an active policy debate. In 2025, the Federal Reserve
@@ -1767,7 +1767,7 @@ embedded in Treasury market prices.
 Three extensions remain for future work. First, a bank-level mechanism test
 using quarterly FR~Y-9C data would directly link the aggregate spread
 compression to variation in individual banks' SLR bind, providing the
-cross-sectional identification that the current design cannot. Second, the point estimate from the full-period DiD, referred to as partial reversion in Section \ref{sec:did_clean}, 
+cross-sectional identification that the current design cannot. Second, the point estimate from the full-period DiD, referred to as ``partial reversion" in Section \ref{sec:did_clean}, 
 implies approximately 16\% of the relief-period compression reversed
 in the nine-month post-expiry window, though this figure is statistically
 imprecise.

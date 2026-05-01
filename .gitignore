@@ -168,13 +168,6 @@ credentials/
 .cache/
 .hidden/
 
-# Data Files (Optional - uncomment if needed)
-# *.csv
-# *.xlsx
-# *.xls
-# *.db
-# data/
-# datasets/
 
 # Temporary Files
 *.tmp
@@ -220,14 +213,3 @@ yarn-error.log
 test_results/
 debug/
 .debug/
-
-# LLM-specific (Claude/OpenAI work)
-.claude/
-.claude*
-.anthropic_cache/
-claude_session_*.json
-api_response_cache/
-*.claude_backup
-embeddings/
-vector_store/
-
