@@ -14,7 +14,7 @@ Regulatory leverage constraints are a leading candidate explanation forlimited i
 
 ```bash
 # 1. Clone and enter the project
-git clone <repo-url>
+git clone https://github.com/BaileyMeche/slr_bucket
 cd slr_bucket
 
 # 2. Create and activate the conda environment
