@@ -8,6 +8,9 @@ Supplementary Leverage Ratio (SLR) exclusion window.
 ## Abstract
 Regulatory leverage constraints are a leading candidate explanation forlimited intermediation in U.S. Treasury markets. In this paper, I exploit the Federal Reserve's temporary exclusion of U.S. Treasury securities and Federal Reserve deposits from the Supplementary Leverage Ratio (SLR) denominator (April 1, 2020 to March 31, 2021) to test whether SLR relief differentially compressed Treasury-based arbitrage spreads relative to non-Treasury controls. Using a pooled difference-in-differences design across 17 daily arbitrage spread series in four strategy classes (Treasury spot-futures, TIPS-Treasury, covered interest parity, and equity spot-futures), I find that during the relief window Treasury spreads were compressed by 10.76 basis points more than non-Treasury spreads relative to the 2019 pre-COVID baseline, and  re-widened  at expiry by 3.84 basis points in the subsequent 60 trading days. Non-Treasury series show no comparable break at the SLR event dates. This behavior is consistent with balance-sheet segmentation rather than a general intermediary funding shock and yields an arbitrage-spread-based estimate of the leverage ratio friction in Treasury markets.
 
+## Recommended Citation
+Meche, B. R. (2026). Balance Sheet Capacity and Cross-Strategy Treasury Arbitrage: SLR Exclusion Event Study [University of Chicago]. https://doi.org/10.6082/UCHICAGO.17296
+
 ---
 
 ## Quick start
