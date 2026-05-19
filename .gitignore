@@ -30,6 +30,8 @@ MANIFEST
 .claire/
 doit*
 
+presentations/
+
 # Python Bytecode & Cache
 __pycache__/
 *.py[cod]
